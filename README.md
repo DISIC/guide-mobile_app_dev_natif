@@ -3,7 +3,7 @@
 Ce guide s'adresse aux développeurs d'applications mobiles qui souhaitent
 connaître les techniques à utiliser pour créer des applications accessibles
 avec les API fournies par les systèmes Android et iOS. Pour chaque
-environnement, l'accessibilité des <span lang="en>widgets</span>
+environnement, l'accessibilité des <span lang="en">widgets</span>
 le plus courants a été testés avec les lecteurs d'écran.
 
 Deux documents distincts sont proposés pour&nbsp;:
