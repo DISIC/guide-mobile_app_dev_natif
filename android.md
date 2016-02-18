@@ -41,7 +41,7 @@
 
 ## À qui s'adresse ce guide&nbsp;?
 
-Ce guide présente des éléments de l'API d'Android utiles pour développer des applications accessibles aux personnes handicapées. Il s'adresse&nbsp;:
+Ce guide présente des éléments de l'API d'Android utiles pour développer des applications accessibles aux personnes en situation de handicap. Il s'adresse&nbsp;:
 
 * Aux développeurs
 * Aux concepteurs en charge de la rédaction de spécifications techniques
@@ -406,7 +406,7 @@ Générer des événements peut être utile lors de la conception d'une interfac
 
 ### AccessibilityEvent
 
-Un événement peut être généré en utilisant la méthode `sendAccessibilityEvent(int)`, avec un paramètre représentant le type d'événement qui s'est produit. 
+Un événement peut être généré en utilisant la méthode `sendAccessibilityEvent(int)`, avec un paramètre représentant le type d'événement qui s'est produit.
 La liste complète des typées d'événements est disponible dans la description de la classe <a href="http://developer.android.com/reference/android/view/accessibility/AccessibilityEvent.html" lang="en">AccessibilityEvent</a>. Citons par exemple&nbsp;:
 
 * `TYPE_VIEW_FOCUSED`&nbsp;: déclenché lorsque le focus est positionné sur une vue
