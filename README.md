@@ -1,4 +1,4 @@
-# Guide de développement d'applications mobiles accessibles avec les API Android et iOS
+# Guide de développement d'applications mobiles accessibles avec les API Android et iOS
 
 Ce guide s'adresse aux développeurs d'applications mobiles qui souhaitent
 connaître les techniques à utiliser pour créer des applications accessibles
