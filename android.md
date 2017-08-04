@@ -1,109 +1,110 @@
-# Guide de développement d'applications accessibles mobiles avec l'API Android
+# Mobile application development guide with the Android API
 
-## Sommaire
+## Table of contents
+<!-- MarkdownTOC depth="3" -->
 
-  * [Sommaire](#sommaire)
-  * [À qui s'adresse ce guide&nbsp;?](#%C3%A0-qui-sadresse-ce-guide&nbsp)
-  * [Généralités sur Android et l'accessibilité](#g%C3%A9n%C3%A9ralit%C3%A9s-sur-android-et-laccessibilit%C3%A9)
-  * [Utliser les éléments de base fournis par l'API Android](#utliser-les-%C3%A9l%C3%A9ments-de-base-fournis-par-lapi-android)
-    * [Widgets compatibles](#widgets-compatibles)
-    * [Widgets incompatibles](#widgets-incompatibles)
-  * [Tester l'accessibilité](#tester-laccessibilit%C3%A9)
-  * [Décrire les éléments d'interface](#d%C3%A9crire-les-%C3%A9l%C3%A9ments-dinterface)
-    * [Exemples de création statique](#exemples-de-cr%C3%A9ation-statique)
-      * [ImageView et ImageButton](#imageview-et-imagebutton)
-      * [CheckBox](#checkbox)
-      * [EditText](#edittext)
-    * [Mise à jour dynamique de la description des contenus](#mise-%C3%A0-jour-dynamique-de-la-description-des-contenus)
-  * [Permettre la modification de la taille des caractères](#permettre-la-modification-de-la-taille-des-caract%C3%A8res)
-  * [Gérer le focus](#g%C3%A9rer-le-focus)
-    * [Activer la prise de focus](#activer-la-prise-de-focus)
-    * [Contrôler l'ordre de lecture](#contr%C3%B4ler-lordre-de-lecture)
-  * [Afficher la prise de focus](#afficher-la-prise-de-focus)
-  * [Masquer les éléments décoratifs](#masquer-les-%C3%A9l%C3%A9ments-d%C3%A9coratifs)
-  * [Forcer la restitution des éléments importants non focusables](#forcer-la-restitution-des-%C3%A9l%C3%A9ments-importants-non-focusables)
-  * [Regrouper des éléments](#regrouper-des-%C3%A9l%C3%A9ments)
-  * [Gérer des événements liés à l'accessibilité](#g%C3%A9rer-des-%C3%A9v%C3%A9nements-li%C3%A9s-%C3%A0-laccessibilit%C3%A9)
-    * [AccessibilityEvent](#accessibilityevent)
-    * [Cheminement des événements](#cheminement-des-%C3%A9v%C3%A9nements)
-    * [Récupérer plus d'informations sur le contexte avec AccessibilityNodeInfo](#r%C3%A9cup%C3%A9rer-plus-dinformations-sur-le-contexte-avec-accessibilitynodeinfo)
-  * [Créer des vues personnalisées accessibles](#cr%C3%A9er-des-vues-personnalis%C3%A9es-accessibles)
-    * [Gérer la navigation par contrôleurs directionnels](#g%C3%A9rer-la-navigation-par-contr%C3%B4leurs-directionnels)
-    * [Implémenter les méthodes pour l'accessibilité](#impl%C3%A9menter-les-m%C3%A9thodes-pour-laccessibilit%C3%A9)
-      * [onInitializeAccessibilityEvent()](#oninitializeaccessibilityevent)
-      * [onInitializeAccessibilityNodeInfo()](#oninitializeaccessibilitynodeinfo)
-      * [onPopulateAccessibilityEvent()](#onpopulateaccessibilityevent)
-    * [Gérer le cas des gestes personnalisés](#g%C3%A9rer-le-cas-des-gestes-personnalis%C3%A9s)
-  * [Pour aller plus loin](#pour-aller-plus-loin)
-  * [Guides connexes](#guides-connexes)
-  * [Ressources externes et références](#ressources-externes-et-r%C3%A9f%C3%A9rences)
-  * [Licence](#licence)
+- [Who is this Guide for?](#who-is-this-guide-for)
+- [Generalities on Android and Accessibility](#generalities-on-android-and-accessibility)
+- [Use the basic elements provided by the Android API](#use-the-basic-elements-provided-by-the-android-api)
+  - [Compatible Widgets](#compatible-widgets)
+  - [Incompatible Widgets](#incompatible-widgets)
+- [Test Accessibility](#test-accessibility)
+- [Describe interface elements](#describe-interface-elements)
+  - [Static creation examples](#static-creation-examples)
+    - [ImageView and ImageButton](#imageview-and-imagebutton)
+    - [CheckBox](#checkbox)
+    - [EditText](#edittext)
+  - [Dynamic content description update](#dynamic-content-description-update)
+- [Allow font size changes](#allow-font-size-changes)
+- [Focus management](#focus-management)
+  - [Turn on focus](#turn-on-focus)
+  - [Check reading order](#check-reading-order)
+- [Display focus](#display-focus)
+- [Hide decorative elements](#hide-decorative-elements)
+- [Force restitution of important non-focusable elements](#force-restitution-of-important-non-focusable-elements)
+- [Items grouping](#items-grouping)
+- [Manage accessibility-related events](#manage-accessibility-related-events)
+  - [AccessibilityEvent](#accessibilityevent)
+  - [Event Traversal](#event-traversal)
+  - [Retrieve more information about the context with AccessibilityNodeInfo](#retrieve-more-information-about-the-context-with-accessibilitynodeinfo)
+- [Create accessible custom views](#create-accessible-custom-views)
+  - [Handling navigation with directional controllers](#handling-navigation-with-directional-controllers)
+  - [Implementing methods for accessibility](#implementing-methods-for-accessibility)
+    - [onInitializeAccessibilityEvent\(\)](#oninitializeaccessibilityevent)
+    - [onInitializeAccessibilityNodeInfo\(\)](#oninitializeaccessibilitynodeinfo)
+    - [onPopulateAccessibilityEvent\(\)](#onpopulateaccessibilityevent)
+  - [Handling custom gestures](#handling-custom-gestures)
+- [To go further](#to-go-further)
+- [Related documents](#related-documents)
+- [External resources and references](#external-resources-and-references)
+- [Licence](#licence)
 
-## À qui s'adresse ce guide&nbsp;?
-
-Ce guide présente des éléments de l'API d'Android utiles pour développer des applications accessibles aux personnes en situation de handicap. Il s'adresse&nbsp;:
-
-* Aux développeurs
-* Aux concepteurs en charge de la rédaction de spécifications techniques
-* Aux chefs de projets
-
-Pré-requis&nbsp;:
-
-* Maîtriser les langages Java et XML
-* Maîtriser les principes de programmation sous Android
-* Connaître les classes de base de l'environnement Android (notamment "activity" et "service")
-* Maîtriser la gestion d'événements
-* Maîtriser les concepts utilisés pour gérer les interfaces utilisateurs sous Android (vues, layouts, etc.) et les principaux éléments de l'API (TextView, CheckBox, RadioButton, etc.)
+<!-- /MarkdownTOC -->
 
 
-## Généralités sur Android et l'accessibilité
 
-L'API Android met à disposition des développeurs des fonctionnalités permettant de créer des applications accessibles. Ces fonctionnalités sont présentes dans les classes qui permettent de créer les éléments de base d'une interface utilisateur ainsi que dans des classes dédiées à l'accessibilité.
 
-Les applications Android peuvent être utilisées par des personnes en situation de handicap (visuel, moteur, etc.), grâce à l'activation de services dédiés à l'accessibilité sur l'appareil utilisé pour exécuter l'application et parfois grâce à l'utilisation de périphériques externes (claviers, commutateurs, plages braille, etc.). Les services d'accessibilité peuvent être activés en se rendant dans les paramètres de l'appareil, dans l'onglet "Accessibilité".
+## Who is this Guide for?
 
-Google développe plusieurs services&nbsp;:
+This guide presents elements of the Android APIs useful for developing applications accessible to people with disabilities. It is aimed at:
 
-* Le lecteur d'écran TalkBack, qui vocalise la navigation à l'intérieur des applications. Il propose plusieurs fonctionnalités&nbsp;:
-  * Exploration tactile&nbsp;: l'utilisateur explore le contenu de l'application en parcourant l'écran avec les doigts. TalkBack pilote un logiciel de synthèse vocale qui prononce les informations relatives aux éléments explorés positionnés sous les doigts de l'utilisateur. Dans ce mode, TalBack redéfinit les gestes "standards"&nbsp;: l'activation d'un élément se fait par exemple par un "double tap".
-  * Navigation gestuelle simplifiée&nbsp;: TalkBack redéfinit des gestes permettant à l'utilisateur de naviguer facilement entre les différents éléments de l'interface.
-  * Retour haptique&nbsp;: lorsque des éléments d'interface sont activés (entrée dans une zone de saisie par exemple), TalkBack le signale à l'utilisateur par des vibrations.
-* BrailleBack, qui permet aux utilisateur possédant des appareils de lecture braille éphémère de les connecter via USB ou Bluetooth à leur appareil Android pour lire et interagir avec le contenu des applications.
+* Developers
+* Designers responsible for drafting technical specifications
+* Project Managers
 
-De même que certains constructeurs proposent des versions modifiées du système Android, il existe des versions modifiées des services d'accessibilité&nbsp;: c'est par exemple le cas des certains téléphones de la marque Samsung qui sont livrés avec le service Galaxy TalkBack, une version du lecteur d'écran basée sur celui développé par Google.
 
-La simple activation de services d'accessibilité ne suffit pas à rendre une application pleinement accessible&nbsp;: le développeur doit mettre en oeuvre des techniques particulières lors du codage de l'application pour rendre son contenu exploitable par les services d'accessibilité.
+Prerequisites:
 
-Lorsque l'interface utilisateur d'une application est constituée d'éléments de base fournis par le <span lang="en">framework</span> Android, la mise en oeuvre de l'accessibilité est relativement simple. La démarche est la suivante&nbsp;:
+* Proficiency in Java and XML
+* Proficiency in Android programming principles
+* Knowledge of the basic classes of the Android environment (including "activity" and "service")
+* Mastery of events management
+* Mastery of the concepts used to manage the user interfaces on Android (views, layouts, etc.) and the main elements of the API (TextView, CheckBox, RadioButton, etc.)
 
-1. Décrire les éléments d'interface pour que leur contenu soit restitué par les services d'accessibilité
-2. Faire en sorte que tous les éléments qui appellent une interaction puissent être atteints par un contrôleur directionnel (trackball, D-pad, etc.)
-3. Faire en sorte que les messages audio soient accompagnés par des notifications visuelles et/ou haptiques, pour être perçues par les personnes sourdes ou malentendantes
 
-Afin de développer des interfaces plus complexes et personnalisées qui nécessitent d'étendre la classe View, il sera nécessaire de s'assurer que ces éléments sont compatibles avec les services d'accessibilité en redéfinissant certaines méthodes, notamment pour gérer correctement les événements liés à l'accessibilité.
+## Generalities on Android and Accessibility
 
-## Utliser les éléments de base fournis par l'API Android
+The Android API provides developers with features to create accessible applications. These features are present in the classes that allow the creation of the basic elements of a user interface as well as in classes dedicated to accessibility.
 
-L'API d'Android fournit des éléments de base (<span lang="en">widgets,
-views</span>) qui implémentent correctement l'accessibilité dans la plupart
-des cas. Il convient en premier lieu de privilégier l'utilisation de ces
-éléments et de n'en définir de nouveaux qu'en cas de nécessité.
+Android applications can be used by people with disabilities (visual, motor, etc.), by activating services dedicated to accessibility on the device used to run the application; and sometimes, by using external input devices (keyboards, switches, braille ranges, etc.). Accessibility services can be activated in the settings of the device in the "Accessibility" tab.
 
-Nous listons ci-dessous des éléments compatibles et non compatibles avec les
-services d'accessibilité. Ils ont été testés avec les versions d'Android 4.3,
-4.4 et 5.1.
+Google develops several services:
 
-### Widgets compatibles
+* The TalkBack screen reader, which vocalizes the user interface. It offers several features:
+  * Exploring by touch: the user explores the content of the application by browsing the screen with her fingers. TalkBack drives a speech synthesis software that pronounces the information about the elements under the user's fingers. In this mode, TalkBack redefines the "standard" gestures: the activation of an element is performed, for example, by a "double tap".
+  * Simplified gesture navigation: TalkBack redefines gestures allowing the user to easily navigate between the various elements of the interface.
+  * Haptic feedback: when interface elements are activated (action in an input area for example), TalkBack informs the user through vibrations.
+* BrailleBack, which allows users with Braille displays, connected through USB or Bluetooth to their Android device, to read and interact with the content of applications.
 
-Les <span lang="en">widgets</span> suivants ont été testés et peuvent être utilisés pour créer des interfaces compatibles avec les services d'accessibilité (en veillant à décrire les contenus et à gérer correctement le focus comme indiqué dans les sections précédentes).
+Some manufacturers offer modified versions of the Android system; similarly, there are modified versions of accessibility services: for example, some Samsung phones that come with the Galaxy TalkBack service, a version of the screen reader based on the one developed by Google.
+
+The mere activation of accessibility services is not enough to make an application fully accessible: the developer must implement particular techniques when coding the application, to make its content accessible to accessibility services.
+
+When the user interface of an application is made up of the basic elements provided by the Android framework, the implementation of accessibility is relatively simple. The approach is:
+
+1. Describe the interface elements for their content to be rendered by accessibility services;
+2. Ensure that all elements that call for interaction can be reached by a directional controller (trackball, D-pad, etc.);
+3. Ensure that audio messages are accompanied by visual and/or haptic notifications to be perceived by persons who are deaf or hard of hearing.
+
+In order to develop more complex and customized interfaces that require to extend the View class, it will be necessary to ensure that these elements are compatible with accessibility services by redefining certain methods, in particular to manage appropriately the accessibility-related events.
+
+## Use the basic elements provided by the Android API
+
+The Android API provides basic elements (widgets, views) that correctly implement accessibility in most cases. Using them as a first choice is recommended, while defining new ones only when required.
+
+We provide below lists of elements that are either compatible or not compatible with accessibility services. They have been tested with versions of Android 4.3, 4.4 and 5.1.
+
+### Compatible Widgets
+
+The following  widgets  have been tested and can be used to create interfaces that are compatible with accessibility services (as long as content is described and focus correctly managed, as mentioned previously).
 
 * EditText
 * CheckBox
 * ToggleButton
 * Switch
-* RadiGroup et RadioButton
+* RadioGroup and RadioButton
 * Chronometer
-* TectClock
+* TextClock
 * AutoCompleteTextView
 * Button
 * ProgressBar
@@ -113,12 +114,12 @@ Les <span lang="en">widgets</span> suivants ont été testés et peuvent être u
 * TextSwitcher
 
 
-<span lang="en">Layouts</span>&nbsp;:
+Layouts:
 
 * LinearLayout
 * TableLayout
 
-Vues&nbsp;:
+Views:
 
 * TextView
 * ImageView
@@ -126,117 +127,124 @@ Vues&nbsp;:
 * SearchView
 * WebView
 
-### Widgets incompatibles
-En revanche, les <span lang="en">widgets</span> suivants ne sont pas compatibles avec les services d'accessibilité. Ils devront être adaptés au cas par cas&nbsp;:
+### Incompatible Widgets
 
-* TabHost&nbsp;: le contenu des onglets n'est pas restitué correctement par les services d'accessibilité
+On the other hand, the following widgets  are not compatible with accessibility services. They will need to be adapted on a case-by-case basis:
+
+* TabHost: The contents of the tabs are not rendered correctly by accessibility services
 * DatePicker
 * TimePicker
 * Spinner
 * ToolBar
 
-Vues&nbsp;:
+Views:
 
 * CalendarView
 * ExpandableListView
 * StackView
 
-## Tester l'accessibilité
+## Test Accessibility
 
-Dans l'API Android, les fonctionnalités relatives à l'accessibilité sont "stabilisées" depuis la version 4.0 (il n'y pas de changement majeur dans l'API). Cependant, les services d'accessibilité (TalkBack notamment) évoluent rapidement et changent parfois l'interprétation qu'ils font de certains éléments d'interface ou de certains événements liés à l'accessibilité. Par exemple, la version 4.3.1 de TalkBack parue en octobre 2015 est en mesure de restituer les changements de valeurs des <span lang="en">"sliders"</span>, ce qui n'était pas le cas dans les versions précédents (on devait alors utiliser l'attribut `contentDescription` pour en restituer le contenu). L'interprétation par les services d'accessibilité des <span lang="en">widgets</span> courants est relativement stable&nbsp;: les tests réalisés n'ont pas permis de mettre en évidence des régressions. En revanche, l'interprétation de vues personnalisées peut varier, mais ces variations sont extrêmement complexes à documenter. Par ailleurs, certains constructeurs de matériel peuvent ajouter des surcouches au système Android, ce qui a parfois un impact sur l'accessibilité. Il est ainsi nécessaire de tester l'accessibilité d'une application Android afin de vérifier que les recommandations présentées ci-dessous sont bien prises en compte par les services d'accessibilité (voir le [Guide d'audit d'applications mobiles](https://github.com/DISIC/guide-mobile_app_audit)).
+In the Android API, the accessibility features have been "stabilized" since version 4.0 (there is no major change in the API). However, accessibility services (TalkBack in particular) are changing rapidly and sometimes changing their interpretation of certain interface elements or accessibility-related events. For example, version 4.3.1 of TalkBack published in October 2015 is able to render changes in values ​​from "sliders", which was not the case in previous versions (it was necessary to use the `contentDescription` attribute to output the content). The interpretation by the accessibility services of the common widgets is relatively stable: the tests performed did not reveal regressions. On the other hand, the interpretation of custom views may vary, but these variations are extremely complex to document. In addition, some hardware manufacturers may add overlays to the Android system, which sometimes has an impact on accessibility. It is therefore necessary to test the accessibility of an Android application to verify that the recommendations presented below are taken into account by the accessibility services (see [Mobile Application Audit Guide](https://github.com/DISIC/guide-mobile_app_audit/tree/english)).
 
-## Décrire les éléments d'interface
-Un grand nombre d'éléments d'une interface utilisateur fournissent des informations sur leur usage ou sur leur signification grâce à des indications visuelles. Par exemple, une application de prise de note utilise un élément `ImageButton` contenant l'image d'un signe "plus"  pour indiquer que l'utilisateur peut ajouter une nouvelle note. Un composant `EditText` peut disposer d'une étiquette qui permet de préciser l'information que l'utilisateur doit saisir. Un utilisateur aveugle ne peut pas percevoir ces indications visuelles. Il est donc nécessaire d'employer un moyen pour ajouter une alternative à ces indications. Pour cela il faut utiliser l'attribut `android:contentDescription` dans la description XML d'un élément d'interface ou la méthode `setContentDescription` dans le code Java. Le texte qui se trouve dans cette description ne sera pas affiché sur l'écran mais sera uniquement traité par les services d'accessibilité lorsque l'utilisateur les aura activés. Avec TalkBack, le texte sera prononcé par le synthétiseur vocal&nbsp;; avec BrailleBack, le texte apparaîtra à proximité de l'élément sur l'afficheur braille.
+## Describe interface elements
 
-### Exemples de création statique
+Many elements of a user interface provide information about their use or meaning through visual indications. For example, a note-taking application uses an `ImageButton` element containing the image of a plus sign to indicate that the user can add a new note. An `EditText` component can have a label to specify the information that the user needs to enter. A blind user cannot  perceive these visual indications. It is therefore necessary to use a means to add a textual equivalent of these indications. To do this, use the `android:contentDescription` attribute in the XML description of an interface element or the `setContentDescription`  method in the Java code. The text in this description will not be displayed on screen, but will be processed by accessibility services when the user has enabled them. With TalkBack, the text will be spoken out by the speech synthesizer; with BrailleBack, the text will appear near the item on the Braille display.
 
-#### ImageView et ImageButton
-`ImageView` permet d'afficher une image à l'écran. `ImageButton` est une sous-classe d'`ImageView` qui lui ajoute les comportements d'un bouton "standard". Ces classes possèdent un attribut `android:src` qui désigne une ressource graphique correspondant à l'image qui sera affichée et utilisée pour représenter le bouton dans le cas d'`ImageButton`. Cette ressource graphique ne pouvant pas être interprétée par les services d'accessibilité, il convient d'utiliser l'attribut `android:contentDescription` pour fournir une alternative textuelle à cette image.
+### Static creation examples
 
-Exemple avec `ImageButton`&nbsp;:
+#### ImageView and ImageButton
+
+`ImageView` displays an image on the screen. `ImageButton` is a subclass of `ImageView` that adds the behaviors of a "standard" button. These classes have an `android:src` attribute that points to a graphical resource corresponding to the image that will be displayed and used to represent the button in the case of `ImageButton`. Because this graphical resource cannot  be interpreted by accessibility services, the `android:contentDescription` attribute must be used to provide a textual alternative to this image.
+
+Example with `ImageButton`:
 ```xml
   <ImageButton
     android:id="@+id/imageButton2"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:src="@drawable/ic_launcher"
-    android:contentDescription="Ajouter une note">
+    android:contentDescription="Add a note">
 ```
 
-Comportement attendu avec TalkBack&nbsp;: annonce du contenu de l'attribut `android:contentDescription` précédé du mot "bouton" lors de la prise de focus ou du survol de l'image
+Expected behavior with TalkBack: the content of the `android:contentDescription` attribute, preceded by the word 'button', are spoken out when taking focus, or hovering the image.
 
 
 #### CheckBox
-`CheckBox` permet d'implémenter une case à cocher.
+
+`CheckBox` allows you to implement a check box.
 
 ```xml
   <CheckBox android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:id="@+id/checkBox"
-    android:text="Re-commander"
-    contentDescription="Re-commander des pivoines"/>
+    android:text="Recommend"
+    contentDescription="Recommend peonies"/>
 ```
 
-L'attribut `android:text` contient le texte affiché à l'écran. Il peut être pertinent d'ajouter des éléments de contexte dans l'attribut `android:contentDescription` pour fournir à l'utilisateur des précisions sur l'action qui sera réalisée lors de l'activation ou la désactivation de la case. Par exemple, une vue peut présenter plusieurs cases à cocher disposées en regard d'une liste de produits dont l'utilisateur doit indiquer si oui ou non il souhaite recommander un/des élément(s). Si seulement l'attribut "android:text" est renseigné avec le texte "Recommander", l'utilisateur ne disposera pas de suffisamment d'informations pour savoir quelle action réalisera le fait de cocher la case. Ajouter "Recommander des pivoines" dans l'attribut `android:contentDescription` lui permettra de connaître plus précisément l'action réalisée lorsqu'il utilise un service d'accessibilité.
+The `android:text` attribute contains the text displayed on screen. It may be relevant to add context elements in the `android:contentDescription` attribute to provide the user with details about what action will be taken when checking or unchecking the box. For example, a view may have several checkboxes next to a list of products, some of which the user can recommend. If only the "android:text" attribute is populated with the "Recommend" text, the user will not have enough information to know which action corresponds with ticking the box. Adding "Recommend peonies" in the  `android:contentDescription` attribute will provide enough information when using an accessibility service.
 
-Comportement attendu avec TalkBack&nbsp;: prononciation de l'état de la case, suivi de "Case à cocher" puis du contenu de la description.
+Expected behavior with TalkBack: speech output of the box current state, followed by "Checkbox" and then the contents of the description.
 
 #### EditText
-`EditText` permet de créer une zone de saisie de texte. Pour `EditText`, contrairement à la plupart des autres <span lang="en">widgets</span> disponibles dans le <span lang="en">framework</span> Android, l'attribut `android:contentDescription` ne peut pas être utilisé pour véhiculer une information décrivant l'élément (le contenu de l'attribut ne sera pas restitué par les services d'accessibilité).
 
-L'utilisation de `android:hint` permet à l'utilisateur de comprendre la nature de l'information attendue&nbsp;: le contenu de `android:hint` est une aide à la saisie affichée lorsque la zone de saisie est vide, et lorsque la zone est complétée, le lecteur d'écran restitue le texte saisi au lieu de l'attribut.
+`EditText` allows to create a text input area. For `EditText`, unlike most other  widgets  available in the  Android framework, the `android:contentDescription` attribute cannot  be used to convey information describing the element (the content of the attribute will not be rendered by the accessibility services).
+
+The use of `android:hint` allows the user to understand the nature of the expected information: the content of `android:hint` is an input help displayed when the input field is empty, and when the area contains input text, the screen reader returns the entered text instead of the attribute.
 ```xml
   <EditText android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:id="@+id/editText"
-    android:hint="Adresse email" />
+    android:hint="e-mail address" />
 ```
 
-Cependant, le contenu de `android:hint` disparaît dès que l'utilisateur saisit un caractère et ne peut plus être restitué, même si la zone est vidée&nbsp;: cela créé des difficultés notamment dans lorsque plusieurs champs de saisie sont proposés dans une même vue. Le meilleur moyen d'assurer l'accessibilité d'une zone de saisie est d''y associer une étiquette visible en utilisant l'attribut `android:labelFor`.
+However, the content of `android:hint` disappears as soon as the user enters a character and cannot  be restored, even if the area is emptied: this causes difficulties especially when several input fields are proposed in a single view. The best way to ensure the accessibility of an input field is to associate a visible label with the `android:labelFor` attribute.
 
-En XML&nbsp;:
+In XML:
 ```xml
   <TextView
-    android:labelFor="Code postal"
+    android:labelFor="Zip Code"
     .../>
 
   <EditText android:id="@+id/edit_text"/>
 ```
 
-En Java, les fonctions `setLabelFor(View label)` ou `setLabeledBy(View label)` peuvent être utilisées.
+In Java, the `setLabelFor(View label)` or `setLabeledBy(View label)` functions can be used.
 
-Comportement attendu avec TalkBack&nbsp;:
+Expected behavior with TalkBack: 
 
-* Le contenu de `android:hint` est restitué uniquement lorsqu'aucun texte n'a été saisi&nbsp;; lorsqu'un texte a été saisi, celui-ci est restitué par TalkBack&nbsp;; lorsqu'un texte a été saisi puis supprimé, TalkBack indique seulement la présence de la zone de saisie sans restituer le contenu de `android:hint`.
-* Le contenu de `android:labelFor` est restitué quel que soit le contexte.
+* The content of `android:hint` is rendered only when no text has been entered; when a text has been entered, it is output by TalkBack; when a text has been entered and then deleted, TalkBack only indicates the presence of the input field without rendering the contents of `android:hint`.
+* The content of `android:labelFor` is rendered in any context.
 
-### Mise à jour dynamique de la description des contenus
-Lorsque le contenu d'un élément évolue au cours du temps, il est nécessaire de veiller à mettre à jour sa description, notamment lorsque l'état de l'élément ne peut être interprété par un autre moyen que cette description. Pour cela, il faut utiliser la méthode `setContentDescription` dans le code Java de l'application. La mise à jour dynamique de la description est par exemple utile dans les cas suivants, lors de la création de <span lang="en">widgets</span> personnalisés&nbsp;:
+### Dynamic content description update
 
-* Pour sélectionner une couleur dans une palette&nbsp;: les couleurs doivent être identifiées par une description textuelle et la description indiquant la couleur sélectionnée doit être mise à jour afin que l'utilisateur en ait connaissance lorsqu'il reprendra le focus sur le <span lang="en">widget</span>
-* Pour sélectionner une date&nbsp;: la description peut être utilisée pour rappeler l'intégralité de la date sélectionnée après la mise à jour d'un des éléments (jour, mois, année) par l'utilisateur
-* Pour indiquer le changement de fonction d'un bouton image lorsque sa signification est véhiculée par la forme ou la couleur&nbsp: un bouton "Lecture" devenant "Pause" par exemple
+When the content of an element changes over time, it is necessary to be careful to update its description, in particular when the state of the element cannot  be interpreted by any other means than this description. To do this, use the `setContentDescription` method in the Java code of the application. For example, dynamic updating of the description is useful in the following cases when creating custom  widgets:
 
-Une méthode pour mettre à jour la description est d'utiliser des <span lang="en">listeners</span> pour surveiller le changement d'état d'un <span lang="en">widget</span> afin de prendre les mesures nécessaires au moment approprié.
+* Color selection in a palette: the colors must be identified by a textual description and the description indicating the selected color must be updated so that the user knows it when the widget receives focus back; 
+* Date selection: the description can be used to recall the entire date selected after the user has updated one of the items (day, month, year);
+* To indicate the change of function of an image button when its meaning is conveyed by shape or color: a "Play" button changed to "Pause" for example.
 
-L'exemple ci-dessous met en oeuvre une `SeekBar`, un <span lang="en">widget</span> qui permet de saisir une valeur prise dans un intervalle déterminé. TalkBack, dans ses version inférieures à 4.3.1, ne surveillait pas le changement d'état de la `SeekBar` et n'était donc pas en mesure d'informer l'utilisateur des changements de valeurs. Ce comportement est identique avec BrailleBack. Le code proposé surveille la modification de la `SeekBar` et met à jour dynamiquement la description fournie aux services d'accessibilité lorsque la valeur change. Ainsi, la valeur sera indiquée à l'utilisateur après chaque changement, ce qui n'aurait pas été le cas par défaut.
-NB&nbsp;: ce code est donné à titre d'exemple&nbsp; avec TalkBack 4.3.1, son utilisation provoque une double restitution lors du changement de la valeur de la `SeekBar`. Il doit donc être considéré comme une illustration du principe de mise à jour dynamique de la description, mais son utilisation n'est pas nécessairement pertinente dans tous les contextes.
+A method for updating the description is to use  listeners  to monitor the change of state of a widget, as to take the necessary measures at the appropriate time.
 
-Description XML&nbsp;:
+The example below uses a `SeekBar`, a  widget meant to enter a value picked within a specified interval. TalkBack, in versions lower than 4.3.1, did not monitor the state change of the `SeekBar` and was therefore not able to inform the user of changes in values. This behavior was identical with BrailleBack. The proposed code monitors the modification of the `SeekBar` and dynamically updates the description provided to the accessibility services when the value changes. Thus, the value will be indicated to the user after each change, which would not have been the case by default.
+NB: this code is given as an example. With TalkBack 4.3.1, its use causes a double restitution when changing the value of the `SeekBar`. It should therefore be considered as an illustration of the principle of dynamic updating of the description, but its use is not necessarily relevant in all contexts.
+
+XML description:
 ```xml
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	      android:layout_width="fill_parent"
-	      android:layout_height="fill_parent"
-	      android:orientation="vertical">
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:orientation="vertical">
 
   <SeekBar android:layout_width="fill_parent"
-	   android:layout_height="wrap_content"
-	   android:id="@+id/reading_speed"
-	   android:max="10"/>
+     android:layout_height="wrap_content"
+     android:id="@+id/reading_speed"
+     android:max="10"/>
 </LinearLayout>
 ```
 
-Code Java&nbsp;:
+
+Java code:
 ```java
   package com.braillenet.android_accessibility;
 
@@ -254,7 +262,7 @@ Code Java&nbsp;:
       super.onCreate(savedInstanceState);
       setContentView(R.layout.progressbar);
       mReadingSpeed = (SeekBar)findViewById(R.id.reading_speed);
-      name = "Vitesse de lecture";
+      name = "Reading speed";
       mReadingSpeed.setOnSeekBarChangeListener(new SeekBarListener(name));
       mReadingSpeed.setContentDescription(name);
     }
@@ -278,67 +286,67 @@ Code Java&nbsp;:
   }
 ```
 
-Comportement attendu avec TalkBack&nbsp: lorsque la valeur est modifiée (on peut utiliser les bouton "+" et "-" du volume pour cela), TalkBack annonce le message "Vitesse de lecture x%".
+Expected behavior with TalkBack: When the value is changed (you can use the "+" and "-" volume buttons for this), TalkBack speaks out "Reading speed x%".
 
-## Permettre la modification de la taille des caractères
+## Allow font size changes
 
-Android propose à l'utilisateur de paramétrer la taille des caractères (menu Paramètres, Accessibilité puis Taille des caractères&nbsp;: Petit, Normal ou Grand). Pour qu'une application réponde correctement à ce paramétrage, il est nécessaire d'utiliser l'unité "sp" (<span lang="en">scale-independent pixel</span>) lors de la définition des tailles de texte.
-Exemple&nbsp;: `<TextView ... android:textSize="12sp"/>`
+Android allows the user to set the size of characters (Settings menu, Display, then Font size: Small, Normal, Large, etc.). For an application to correctly respond to this setting, it is necessary to use the "sp" (scale-independent pixel) unit when defining text sizes.
+Example: `<TextView ... android:textSize="12sp"/>`
 
-Il est possible de connaître le facteur d'ajustement sélectionné par l'utilisateur appliqué à la taille des caractères, ce qui permet d'adapter le comportement de l'application en conséquence (modifier le nombre de colonnes d'un tableau par exemple). Pour cela, il faut accéder à la valeur `Settings.System.FONT_SCALE` de la table `Settings.System.CONTENT_URI`. (1.0f est la valeur correspondant à la taille "normale").
+It is possible to know the user-selected adjustment factor applied to the characters' size, which makes it possible to adapt the behavior of the application accordingly (modify the number of columns of an array for example). To do this, access the `Settings.System.FONT_SCALE` value from the `Settings.System.CONTENT_URI` table. (1.0f is the value corresponding to the "normal" size).
 
-Exemple&nbsp;:
+Example:
 ```java
   ContentResolver r = getContentResolver();
   Cursor c = r.query(Settings.System.CONTENT_URI,
                      new String[] { Settings.System.VALUE },
-		     Settings.System.NAME + "= ?",
-		     new String[] { Settings.System.FONT_SCALE }, null);
+         Settings.System.NAME + "= ?",
+         new String[] { Settings.System.FONT_SCALE }, null);
   float fs = c.getFloat(0);
   if(fs ...) {
-     ..
+    ...
   } else {
     ...
   }
 ```
 
-## Gérer le focus
+## Focus management
 
-Il est nécessaire de permettre aux utilisateurs de naviguer entre les différents éléments de l'interface grâce à un contrôleur directionnel. Un tel contrôleur peut être matériel (trackball, D-Pad, flèches d'un clavier, etc.) ou virtuel comme le clavier fourni par une application ou le mode de navigation gestuelle disponible depuis Android 4.1. La navigation grâce aux contrôleurs directionnels est largement utilisée, notamment par les personnes en situation de handicap moteur.
+It is necessary to allow users to navigate between the various elements of the interface through a directional controller. Such a controller can be a piece of hardware (trackball, D-Pad, keyboard arrows, etc.), or virtual, such as the on-screen keyboard provided by an application, or the gestural navigation mode available since Android 4.1. Navigation using directional controllers is widely used, especially by people with motor disabilities.
 
-Pour s'assurer qu'une telle navigation fonctionne, il est nécessaire de vérifier que tous les éléments d'une application soient atteignables sans utiliser les interactions tactiles. Il est par ailleurs nécessaire de vérifier que cliquer sur le bouton central (ou le bouton OK) d'un contrôleur directionnel a le même effet que de toucher un élément sur l'écran possédant le focus.
+To ensure that such navigation works, it is necessary to verify that all the elements of an application are reachable without using tactile interactions. It is also necessary to make sure that clicking the center button (or the OK button) on a directional controller has the same effect as touching a focused item on the screen.
 
-### Activer la prise de focus
+### Turn on focus
 
-Un élément d'une interface utilisateur est atteignable en utilisant un contrôleur directionnel lorsque l'attribut `android:focusable` vaut "true"&nbsp;: cela permet à l'utilisateur de prendre le focus sur cet élément et d'interagir avec le contenu. Les éléments de base fournis par le <span lang="en">framework</span> Android sont focusables par défaut. Le fait qu'un élément soit porteur ou non du focus est signalé par une modification de son apparence.
-L'API d'Android fournit plusieurs méthodes permettant de contrôler qu'un élément est bien focusable, ainsi que de donner le focus à un élément&nbsp;:
+An element of a user interface is reachable by using a directional controller when the `android:focusable` attribute is set to 'true': this allows the user to set focus on that element and interact with the content. The basic elements provided by the Android framework  are focusable by default. Whether or not an element has focus is indicated by a change in its appearance.
+The Android API provides several methods for controlling that an item is actually focusable, as well as setting focus on an element:
 
-* `setFocusable()`&nbsp;: indique que le focus pourra être pris sur l'élément
-* `isFocusable()`&nbsp;: indique si un élément peut recevoir le focus
-* `requestFocus()`&nbsp;: permet de donner le focus à un élément
+* `setFocusable()`: indicates that the element will be able to get focus
+* `isFocusable()`: indicates whether an element can receive focus or not
+* `requestFocus()`: sets focus to an element
 
-Si une vue ne peut pas recevoir le focus par défaut, il est possible d'utiliser l'attribut `android:focusable` avec la valeur "true" ou d'utiliser la méthode `setFocusable()` pour changer ce comportement.
+If a view cannot  receive the focus by default, you can use the `android:focusable` attribute with the value 'true' or use the `setFocusable()` method to change this behavior.
 
-### Contrôler l'ordre de lecture
+### Check reading order
 
-Lorsqu'un utilisateur navigue dans une application grâce à un contrôleur directionnel, le focus passe d'un élément de l'interface à l'autre selon un ordre déterminé par un algorithme qui cherche l'élément le plus proche dans la direction souhaitée. Dans certains cas, l'ordre calculé par cet algorithme peut ne pas être cohérent avec la logique de l'application. Pour contourner ce problème, il est possible de définir des relations entre les différents éléments. Les attributs `android:nextFocusDown` (respectivement `android:nextFocusUp`, `android:nextFocusLeft` et `android:nextFocusRight`) permettent de définir le prochain élément qui recevra le focus lorsque l'utilisateur se déplacera vers le bas (respectivement vers le haut, à gauche et à droite).
+When a user navigates an application using a directional controller, the focus moves from one element of the interface to the other in a sequence determined by an algorithm that searches for the closest element in the desired direction. In some cases, the order calculated by this algorithm may not be consistent with the logic of the application. To work around this problem, it is possible to define relationships between the different elements. The `android:nextFocusDown` (`android:nextFocusUp`, `android:nextFocusLeft` and `android:nextFocusRight`) attributes let you define the next element that will receive focus when the user moves down (up, left and right, respectively).
 
-Exemple&nbsp;:
+Example:
 ```xml
   <LinearLayout android:orientation="horizontal"
         ... >
     <EditText android:id="@+id/edit"
-      android:nextFocusDown=”@+id/text”
+      android:nextFocusDown="@+id/text" 
       ... />
     <TextView android:id="@+id/text"
-      android:focusable=”true”
-      android:text="Je suis une TextView focusable"
-      android:nextFocusUp=”@id/edit”
+      android:focusable="true" 
+      android:text="I am a focusable TextView"
+      android:nextFocusUp="@id/edit" 
       ... />
   </LinearLayout>
 ```
 
-Cette technique peut par exemple s'appliquer pour faire en sorte que le focus décrive un cercle autour d'un ensemble d'éléments constituant une horloge&nbsp;: à 12h, on souhaite passer à 1h en appuyant sur "droite" ou "bas" et à 11h en appuyant sur "gauche" ou "bas". On aura des relations du type&nbsp;:
+This technique may for example be applied to make the focus describe a circle around a set of elements constituting a clock. At 12, the desired behavior is to move to 1 by pressing "right" or "down", and to 11  by pressing "left" or "down". We will have these types of relations:
 ```xml
   <Button
     android:text="12"
@@ -371,11 +379,11 @@ Cette technique peut par exemple s'appliquer pour faire en sorte que le focus d�
   </Button>
 ```
 
-## Afficher la prise de focus
+## Display focus
 
-Il est nécessaire d'indiquer visuellement quel élément possède le focus. Pour cela, il faut créer un `drawable` et lui affecter l'attribut `android:drawable` pour l'état `state_focusable= "true"`.
+It is necessary to indicate visually which element has the focus. To do this, you must create a `drawable` and assign the `android:drawable` attribute for `state_focusable="true"`.
 
-Exemple&nbsp;:
+Example:
 ```xml
   <selector xmlns:android="http://schemas.android.com/apk/res/android">
     ...
@@ -384,84 +392,86 @@ Exemple&nbsp;:
 ```
 
 
-## Masquer les éléments décoratifs
+## Hide decorative elements
 
-Il est nécessaire de masquer les éléments décoratifs (par exemple une image n'apportant pas d'information supplémentaire dans le contexte dans lequel elle apparaît) pour faire en sorte qu'ils ne soient pas restitués par TalkBack. Pour cela, il faut utiliser l'attribut `android:importantForAccessibility="no"`.
+It is necessary to hide the decorative elements (e.g. an image that does not provide additional information in the context in which it appears) so that they are not rendered by TalkBack. To do this, use the `android:importantForAccessibility="no"` attribute.
 
-## Forcer la restitution des éléments importants non focusables
+## Force restitution of important non-focusable elements
 
-Certains éléments non focusables, comme les images non cliquables, ne sont par défaut pas restitués par TalkBack&nbsp;: ce comportement est problématique si ces éléments ne sont pas décoratifs (i.e. qu'ils contiennent des informations essentiels à la compréhension). Il convient alors de forcer leur restitution par les services d'accessibilité en utilisant l'attribut `android:importantForAccessibility="yes"`.
+Some non-focusable elements, such as non-clickable images, are not rendered by TalkBack. This behavior is problematic if these elements are not decorative (i.e. they contain information essential for comprehension). It is then necessary to force their rendering by the accessibility services using the attribute `android:importantForAccessibility="yes"`.
 
-## Regrouper des éléments
+## Items grouping
 
-Pour faciliter la restitution par les outils d'assistance, il peut être utile de grouper les informations contenues dans plusieurs éléments en une seule description afin de minimiser le nombre d'opérations que devra effectuer l'utilisateur pour y accéder. Par exemple, il est pertinent de regrouper l'intitulé d'un produit, son poids et son prix en un texte qui sera restitué à l'utilisateur en une seule fois.
+To make the output by assistive technologies more meaningful, it may be useful to group the information contained in several elements into a single description, in order to minimize the number of operations that the user must perform to access it. For example, it is appropriate to group the title of a product, its weight and price into a text that will be returned to the user in one go.
 
-Pour cela, il est nécessaire de créer un <span lang="en">layout</span> parent avec l'attribut `android:importantForAccessibility="yes"`, de lui associer des fils qui seront créés avec l'attribut `android:importantForAccessibility="no"`, et de placer la description de l'ensemble des éléments regroupés dans l'attribut `android:contentDescription` du <span lang="en">layout</span> parent.
+To do this, you need to create a parent layout with the attribute `android:importantForAccessibility="yes"`, to associate children to it, that will have the  `android:importantForAccessibility="no"` attribute, and to place the description of the grouped elements in the `android:contentDescription` attribute of the parent layout.
 
-## Gérer des événements liés à l'accessibilité
+## Manage accessibility-related events
 
-Dans les éléments de base du <span lang="en">framework</span> Android, lorsque du contenu est sélectionné, que le focus change ou qu'un élément est survolé, des événements du type `AccessibilityEvent` sont créés. Ces événements sont reçus et interprétés par les services d'accessibilité afin par exemple de fournir des fonctionnalités de restitution vocale aux utilisateurs.
+In the Android framework core elements, when content is selected, when the focus moves, or an item is hovered, events of the  `AccessibilityEvent` type are triggered. These events are caught and interpreted by the accessibility services to provide vocal feedback to users, for example.
 
-Générer des événements peut être utile lors de la conception d'une interface utilisateur qui met en oeuvre des vues personnalisées et capturer des événement sert aux services d'accessibilité pour interpréter le comportement d'une application.
+Generating events can be useful when designing a user interface with custom views; catching events will allow accessibility services to interpret the behavior of an application.
 
 ### AccessibilityEvent
 
-Un événement peut être généré en utilisant la méthode `sendAccessibilityEvent(int)`, avec un paramètre représentant le type d'événement qui s'est produit.
-La liste complète des typées d'événements est disponible dans la description de la classe <a href="http://developer.android.com/reference/android/view/accessibility/AccessibilityEvent.html" lang="en">AccessibilityEvent</a>. Citons par exemple&nbsp;:
+An event can be triggered using the `sendAccessibilityEvent(int)` method, with a parameter representing the type of event that occurred.
+The complete list of event types is available in the  <a href="https://developer.android.com/reference/android/view/accessibility/AccessibilityEvent.html">AccessibilityEvent</a> class description. Examples:
 
-* `TYPE_VIEW_FOCUSED`&nbsp;: déclenché lorsque le focus est positionné sur une vue
-* `TYPE_VIEW_CLICKED`&nbsp;: déclenché lorsqu'un clic est réalisé sur une vue (`Button, CompoundButton`, etc.)
-* `TYPE_VIEW_TEXT_CHANGED`&nbsp;: déclenché lorsque le texte est modifié dans une zone de saisie (`EditText`)
-* `TYPE_ANNOUNCEMENT`&nbsp;: événement "générique" qui peut être utilisé lorsqu'aucun autre type d'événement ne convient, pour indiquer un changement de contexte ou envoyer une information spécifiques destinée à être restituée par les services d'accessibilité. À noter que la classe `View` met à disposition la méthode `announceForAccessibility(CharSequence text)` qui est un moyen simple d'envoyer cet événement.
+* `TYPE_VIEW_FOCUSED`: triggered when the focus is set on a view
+* `TYPE_VIEW_CLICKED`: triggered when clicking on a view (`Button`, `CompoundButton`, etc.)
+* `TYPE_VIEW_TEXT_CHANGED`: triggered when text is changed in an edit box (`EditText`)
+* `TYPE_ANNOUNCEMENT`: "generic" event that can be used when no other type of event is appropriate, to indicate a change of context or to send specific information to be rendered by the accessibility services. Note that the `View` class provides the `announceForAccessibility(CharSequence text)` method, which is a simple way to send this event.
 
-Chaque événement dispose de propriétés accessibles via des méthodes permettant de connaître des informations à son sujet lorsqu'il est intercepté par un service d'accessibilité. Par exemple&nbsp;:
+Each event has properties that can be accessed through different methods when it is intercepted by an accessibility service. For example:
 
-* `getClassName()`&nbsp;: le nom de la classe d'où a été émis l'événement
-* `getPackageName()`&nbsp;: le nom du package d'où a été émis l'événement
-* `getContentDescription()`&nbsp;: le contenu de l'attribut `contentDescription` de la source
-* `isPassword()`&nbsp;: si la source est un champ destiné à recevoir un mot de passe
+* `getClassName()`: the name of the class from which the event was issued
+* `getPackageName()`: the name of the package from which the event was issued
+* `getContentDescription()`: the contents of the source `contentDescription` attribute
+* `isPassword()`: if the source is a field intended to receive a password
 
-D'autres méthodes permettent d'initialiser ou de modifier des propriétés de la source de l'événement. Par exemple&nbsp;:
+Other methods allow you to initialize or modify properties of the event source. For example:
 
-* `setContentDescription`&nbsp;: définit la description (correspond à l'information contenue dans l'attribut `android:contentDescription` vue plus haut)
-* `setPassword`&nbsp;: définit si un élément est destiné à recevoir un mot de passe
+* `setContentDescription`: defines the description (corresponds to the information contained in the `android:contentDescription` attribute mentioned above)
+* `setPassword`: defines whether an item is intended to receive a password
 
-### Cheminement des événements
+### Event Traversal
 
-En plus de la méthode `sendAccessibilityEvent`, la classe `View` propose d'autres méthodes pour gérer les événements liés à l'accessibilité&nbsp;:
+In addition to the `sendAccessibilityEvent` method, the `View` class provides other methods for managing accessibility events:
 
-* `sendAccessibilityEventUnchecked`&nbsp;: cette méthode est utilisée lorsque le code appelant gère directement la vérification de l'activation des fonctions liées à l'accessibilité (en appelant `AccessibilityManager.isEnabled()`).
-* `onPopulateAccessibilityEvent()`&nbsp;: définit le texte qui sera prononcé lors du déclenchement de l'`AccessibilityEvent` pour la vue concernée.
-* `onInitializeAccessibilityEvent()`&nbsp;: méthode permettant d'obtenir des informations supplémentaires concernant l'état de la vue.
-* `onInitializeAccessibilityNodeInfo()`&nbsp;: fournit des informations concernant l'état de la vue aux services d'accessibilité.
-* `onRequestSendAccessibilityEvent()`&nbsp;: méthode appelée lorsqu'un enfant d'une vue a généré un `AccessibilityEvent`. Cela permet par exemple à la vue parente de modifier l'événement de l'enfant pour y ajouter des informations.
+* `sendAccessibilityEventUnchecked`: this method is used when the calling code directly handles the verification of activation of accessibility-related functions (by calling `AccessibilityManager.isEnabled()`).
+* `onPopulateAccessibilityEvent()`: defines the text that will be spoken out when the AccessibilityEvent is triggered for the view concerned.
+* `onInitializeAccessibilityEvent()`: method for obtaining additional information about the state of the view.
+* `onInitializeAccessibilityNodeInfo()`: provides information to accessibility services about the state of the view.
+* `onRequestSendAccessibilityEvent()`: method called when a child of a view triggered an 'AccessibilityEvent`. This allows, for example, the parent view to modify the child's event to add information.
 
-Pour comprendre le rôle des méthodes mentionnées ci-dessus, il est nécessaire de connaître le cheminement d'un événement&nbsp;:
+To understand the role of the methods mentioned above, it is necessary to know the traversal of an event:
 
-* Lorsqu'un service d'accessibilité est activité et que l'utilisateur réalise une action (clic, prise de focus, survol, etc.), la vue est notifiée grâce à un appel à `sendAccessibilityEvent` (ou `sendAccessibilityEventUnchecked`)&nbsp;;
-* Quand elles sont appelées, les méthodes `sendAccessibilityEvent()` et `sendAccessibilityEventUnchecked()` emploient un mécanisme de <span lang="en">callback</span> qui fait appel à `onInitializeAccessibilityEvent()` pour initialiser l'événement&nbsp;;
-* Une fois initialisé, si le type de l'événement requiert qu'il soit propagé avec de l'information textuelle, la vue reçoit un appel à `dispatchPopulateAccessibilityEvent()`&nbsp;;
-* Par un mécanisme de <span lang="en">callback</span>, `dispatchPopulateAccessibilityEvent()` appelle `onPopulateAccessibilityEvent()`&nbsp;;
-* La vue fait ensuite remonter l'événement dans la hiérarchie des vues en appelant `requestSendAccessibilityEvent()` sur la vue "parent". Chaque vue "parent" a alors la possibilité d'enrichir les informations concernant l'accessibilité en ajoutant une `AccessibilityRecord`, jusqu'à ce que l'événement atteigne la vue racine&nbsp;;
-* Une fois à la racine, l'événement est envoyé à l'`AccessibilityManager` par `sendAccessibilityEvent()`.
+* When an accessibility service is active and the user performs an action (click, focus, hover, etc.), the view is notified by a call to `sendAccessibilityEvent` (or sendAccessibilityEventUnchecked`) 
+* When called, the `sendAccessibilityEvent()` and `sendAccessibilityEventUnchecked()` methods use a  callback  mechanism that uses `onInitializeAccessibilityEvent()` to initialize the event
+* Once initialized, if the event type requires that it be propagated with text information, the view receives a call to `dispatchPopulateAccessibilityEvent()`;
+* Through a  callback  mechanism, `dispatchPopulateAccessibilityEvent()` calls `onPopulateAccessibilityEvent()`;
+* The view then returns the event to the views hierarchy by calling `requestSendAccessibilityEvent()` on the parent view. Each ancestor view then has the ability to add information about accessibility by adding an `AccessibilityRecord` until the event reaches the root view
+* Once at the root, the event is sent to the `AccessibilityManager` via `sendAccessibilityEvent()`.
 
-### Récupérer plus d'informations sur le contexte avec AccessibilityNodeInfo
-Le rôle principal d'un événement est d'exposer suffisamment d'information à un service d'accessibilité pour que celui-ci fournisse lui-même des informations pertinentes à l'utilisateur. Parfois, un service d'accessibilité peut avoir besoin de davantage d'information que celle véhiculée par l'événement. Dans ce cas, il est possible de récupérer un objet de type `AccessibilityNodeInfo` qui représente l'état d'une vue, ce qui permet à un service d'accessibilité d'explorer le contenu de la fenêtre. (Pour des raisons de sécurité, l'accès à la source d'un événement est un privilège qui doit être explicitement demandé par une application.)
+### Retrieve more information about the context with AccessibilityNodeInfo
 
-`AccessibilityNodeInfo` représente un noeud du contenu de la fenêtre ainsi que les actions qui peuvent être demandées depuis la source. De nombreuses méthodes permettent alors d'explorer le contenu de la fenêtre. Par exemple&nbsp;:
+The main role of an event is to expose enough information to an accessibility service so that it provides relevant information to the user. Sometimes, an accessibility service may need more information than that conveyed by the event. In this case, it is possible to retrieve an object of type `AccessibilityNodeInfo` that represents the state of a view, which allows an accessibility service to explore the contents of the window (for security reasons, access to the source of an event is a privilege that must be explicitly requested by an application).
 
-* `findAccessibilityNodeInfosByViewId`&nbsp;: renvoie une liste d'éléments de type `AccessibilityNodeInfo` correspondant à un identifiant
-* `findFocus`&nbsp;: trouve la vue qui possède le focus
-(Se référer à la classe  <a href="http://developer.android.com/reference/android/view/accessibility/AccessibilityNodeInfo.html" lang="en">AccessibilityNodeInfo</a> pour une liste exhaustive.)
+`AccessibilityNodeInfo` represents a node of the contents of the window as well as the actions that can be requested from the source. There are many ways to explore the contents of the window. For example:
 
-## Créer des vues personnalisées accessibles
-Le <span lang="en">framework</span> Android offre un nombre importants de composants de base&nbsp;: des <span lang="en">widgets</span> (`Button, CheckBox`, etc.) et des <span lang="en">layouts</span> (`LinearLayout, FrameLayout`, etc.). Il est toutefois possible de créer des composants personnalisés, en étendant la classe `View`&nbsp;: cela permet par exemple de contrôler précisément l'apparence et les fonctionnalités d'un élément. Il est alors nécessaire de s'assurer que ces éléments personnalisés sont accessibles.
+* `findAccessibilityNodeInfosByViewId`: returns a list of elements of type `AccessibilityNodeInfo` corresponding to an identifier
+* `findFocus`: finds the view that has the focus
+(Refer to the <a href="https://developer.android.com/reference/android/view/accessibility/AccessibilityNodeInfo.html"> AccessibilityNodeInfo</a> class for an exhaustive list.)
 
-### Gérer la navigation par contrôleurs directionnels
+## Create accessible custom views
 
-Sur la plupart des appareils, cliquer dans une vue en utilisant un contrôleur directionnel envoie un `KeyEvent` de type `KEYCODE_DPAD_CENTER` à la vue qui possède le focus. Toutes les vues Android de base traitent de manière appropriée ce type `KEYCODE_DPAD_CENTER`. Lorsqu'une vue personnalisée est mise en oeuvre, il faut veiller à ce que cet événement ait le même effet que toucher la vue sur l'écran tactile. Par ailleurs, il est aussi nécessaire de traiter l'événement `KEYCODE_ENTER` de la même façon que `KEYCODE_DPAD_CENTER`, ceci afin de faciliter la navigation au clavier.
+The Android framework   offers a large number of basic components: widgets  (`Button`, `CheckBox`, etc.) and layouts  (`LinearLayout`, `FrameLayout`, etc.). However, it is possible to create custom components, by extending the `View` class: this allows for example to precisely control the appearance and functionality of an element. It is then necessary to ensure that these customized elements are accessible.
 
-Par exemple&nbsp;:
+### Handling navigation with directional controllers
+
+On most devices, clicking in a view using a directional controller sends a `KeyEvent` of type `KEYCODE_DPAD_CENTER` to the view that has the focus. All basic Android views process this type `KEYCODE_DPAD_CENTER` appropriately. When a custom view is implemented, ensure that this event has the same effect as touching the view on the touchscreen. In addition, it is also necessary to process the `KEYCODE_ENTER` event in the same way as `KEYCODE_DPAD_CENTER`, in order to facilitate keyboard navigation.
+
+For example:
 ```java
   public boolean onKeyUp(int keyCode, KeyEvent event) {
     if ((keyCode == KeyEvent.KEYCODE_DPAD_CENTER) || (keyCode == KeyEvent.KEYCODE_ENTER)) {
@@ -470,48 +480,47 @@ Par exemple&nbsp;:
   }
 ```
 
-### Implémenter les méthodes pour l'accessibilité
+### Implementing methods for accessibility
 
-Afin de supporter l'accessibilité dans une vue personnalisée, il est nécessaire de surcharger et d'implémenter les méthodes décrites à la fin de la section "Gérer des événements liés à l'accessibilité".
+In order to support accessibility in a custom view, it is necessary to override and implement the methods described at the end of the section "Managing accessibility-related events".
 
-Avant de donner des exemples d'implémentation de ces méthodes pour créer des vues personnalisées accessibles, il est important de comprendre l'ordre dans lequel sont gérés les événements liés à l'accessibilité.
+Before giving examples of how to implement these methods to create custom views that are accessible, it is important to understand the order in which accessibility-related events are handled.
 
 #### onInitializeAccessibilityEvent()
 
-Cette méthode est appelée par le système pour obtenir de l'information concernant l'état d'une vue. Si un composant personnalisé propose des fonctionnalités supplémentaires par rapport à un composant dont il hérite, il convient de surcharger la méthode `onInitializeAccessibilityEvent` et d'ajouter les informations supplémentaires liées au composant personnalisé. Pour surcharger la méthode, il faut d'abord appeler la méthode de la classe héritée et ensuite modifier des propriétés qui n'ont pas été initialisées par la méthode de la classe héritée.
+This method is called by the system to get information about the state of a view. If a custom component offers additional functionality over a component that it inherits, you should override the onInitializeAccessibilityEvent method and add additional information related to the custom component. To override the method, you must first call the method of the inherited class and then modify properties that were not initialized by the method of the inherited class.
 
-Supposons par exemple que l'on souhaite étendre la classe `BaseToggleButton` pour faire en sorte que le bouton proposé soit coché par défaut. On aura un code du type&nbsp;:
+For example, suppose that you want to extend the `BaseToggleButton` class to make sure that the proposed button is checked by default. We will have a piece of code like:
+
 ```java
   public static class AccessibleCompoundButtonInheritance extends BaseToggleButton {
     ...
-    // Cette méthode sera appelée à chaque appel de sendAccessibilityEvent()
+    // This method will be called each time sendAccessibilityEvent() is called
     @Override
     public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
-      // On appelle l'implémentation de onInitializeAccessibilityEvent de la
-      // classe héritée puis on initialise la propriété "checked" qui n'est
-      // pas présente dans la classe héritée
+      // The implementation of onInitializeAccessibilityEvent of the inherited class is called
+      // then we initialize the "checked" property which is not in the inherited class
       super.onInitializeAccessibilityEvent(event);
       event.setChecked(isChecked());
     }
   }
 ```
 
-
 #### onInitializeAccessibilityNodeInfo()
 
-`onInitializeAccessibilityNodeInfo` permet d'initialiser des informations concernant l'état de la vue qui serviront aux services d'accessibilité lorsqu'ils consulteront la source (type `AccessibilityNodeInfo`) d'un événement. Comme précédemment, cette méthode doit être surchargée pour fournir des informations complémentaires en plus de celles fournies par la classe héritée.
+`onInitializeAccessibilityNodeInfo` is used to initialize information about the state of the view that will be used for accessibility services, when they check the source (type `AccessibilityNodeInfo`) of an event. As above, this method must be overridden to provide additional information in addition to that provided by the inherited class.
 
-Les objets de type `AccessibilityNodeInfo` créés par cette méthode sont utilisés par les services d'accessibilité pour explorer la hiérarchie d'une vue qui a généré un événement d'accessibilité après que celui-ci ait été reçu, ce qui permet aux services d'accessibilité d'obtenir plus d'éléments sur le contexte d'apparition de l'événement.
+AccessibilityNodeInfo objects created by this method are used by accessibility services to explore the hierarchy of a view that has generated an accessibility event after it has been received, which allows the accessibility services to get more information about the context of the occurrence of the event.
 
-Une implémentation de `onInitializeAccessibilityNodeInfo` est par exemple&nbsp;:
+An example of an implementation of `onInitializeAccessibilityNodeInfo` is:
 ```java
   public static class AccessibleCompoundButtonInheritance extends BaseToggleButton {
     ...
     @Override
     public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
       super.onInitializeAccessibilityNodeInfo(info);
-      // On appelle l'implémentation de la classe héritée et on ajoute
-      // des propriétés: checkable, isChecked, et le texte
+      // We call the implementation of the inherited class and we add
+      // properties: checkable, isChecked, and text
       info.setCheckable(true);
       info.setChecked(isChecked());
       CharSequence text = getText();
@@ -522,56 +531,57 @@ Une implémentation de `onInitializeAccessibilityNodeInfo` est par exemple&nbsp;
   }
 ```
 
-
 #### onPopulateAccessibilityEvent()
-Chaque événement `AccessibilityEvent` dispose d'un ensemble de propriétés qui décrivent l'état courant de la vue. Lors de la création d'une vue personnalisée, il est nécessaire de fournir des informations sur le contexte et sur les caractéristiques de la vue&nbsp;: ce peut être l'étiquette d'un bouton, mais aussi des informations supplémentaires qui seront fournies à l'utilisateur.
 
-La méthode `onPopulateAccessibilityEvent()` permet de fournir ces informations supplémentaires sur l'état d'une vue&nbsp,: elle est appelée automatiquement par le système pour chaque `AccessibilityEvent`. Cette méthode est donc l'endroit approprié pour décrire l'état d'une vue personnalisée afin notamment de fournir des instructions spécifiques à l'utilisateur de services d'accessibilité.
+Each `AccessibilityEvent` has a set of properties that describe the current state of the view. When creating a custom view, it is necessary to provide information about the context and the characteristics of the view: this may be the label of a button, but also additional information that will be provided to the user.
 
-Le code suivant permet par exemple de faire prononcer le message "faites glisser" par les services d'accessibilité lorsqu'ils prennent le focus sur la vue&nbsp;:
+The `onPopulateAccessibilityEvent()` method allows you to provide this additional information about the state of a view, which is called automatically by the system for each `AccessibilityEvent`. This method is therefore the appropriate place to describe the state of a custom view in order to provide specific instructions to the user of accessibility services.
+
+For example, the following code allows the accessibility services to speak out the "drag" message when they set focus on the view:
 ```java
   public class TestView extends View {
     ...
 
-    // Méthode appelée pour propager les événements liés à l'accessibilité.
+    // Method called to propagate events related to accessibility.
     public void onPopulateAccessibilityEvent(AccessibilityEvent event) {
-      // On commence par appeler la méthode de la classe héritée
+      // We start by calling the method of the inherited class
       super.onPopulateAccessibilityEvent(event);
-      // On récupérère le type d'événement
+      // We retrieve the event type
       int eventType = event.getEventType();
-      // S'il correspond à une prise de focus par un service d'accesibilité...
+      // If it corresponds to a capture of focus by an accessibility service...
       if (eventType == AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED) {
-        // ... on modifie l'événement pour ajotuer du texte qui sera
-	// prononcé par le service
-        event.getText().add("Faites glisser");
+        // ... we modify the event to add text that will be
+// spoken out by the service
+        event.getText().add("Drag");
       }
     }
   }
 ```
 
-### Gérer le cas des gestes personnalisés
-Des vues personnalisées peuvent mettre en oeuvre des interactions gestuelles non standards. Ceci est réalisé en utilisant la méthode `onTouchEvent` pour détecter certains types d'événements. Les services d'accessibilité redéfinissent souvent les gestes de base qui permettent de naviguer à l'intérieur d'une application et les actions qui y sont associés. Il est donc nécessaire de s'assurer que les interactions gestuelles personnalisées resteront compatibles avec les services d'accessibilité, qu'elles permettront de générer des actions qui pourront être interprétées par eux et que ces actions pourront être réalisées par d'autres moyens que l'utilisation de l'écran tactile.
+### Handling custom gestures
 
-Le code qui génère la capture des événements tactiles doit réaliser les deux actions suivantes&nbsp;:
+Customized views can implement non-standard gestural interactions. This is done by using the `onTouchEvent` method to detect certain types of events. Accessibility services often redefine the basic gestures that allow you to navigate within an application and the actions associated with it. It is therefore necessary to ensure that personalized gesture interactions remain compatible with accessibility services, that they will generate actions that can be interpreted by them, and that these actions can be carried out by means other than the use of the touch screen.
 
-1. Générer un `AccessibilityEvent` approprié à l'action réalisée par clic
-2. Permettre aux services d'accessibilité de réaliser l'action par un autre moyen que l'écran tactile
+The code that generates the touch events capture must perform the following actions:
 
-Pour cela, il est nécessaire de surcharger la méthode `performClick()` qui doit d'abord exécuter la méthode de la classe héritée puis exécuter les actions correspondant à l'événement "clic" capturé. La méthode `performClick()` doit ensuite être appelée.
+1. Generate an appropriate AccessibilityEvent` for the click action
+2. Allow accessibility services to perform the action by means other than the touch screen
 
-Par exemple&nbsp;:
+To do this, it is necessary to override the `performClick()` method which must first execute the method of the inherited class and then perform the actions corresponding to the captured 'click' event. The `performClick()` method must then be called.
+
+For example:
 ```java
   public boolean onTouchEvent(MotionEvent event) {
     super.onTouchEvent(event);
     switch (event.getAction()) {
       case MotionEvent....:
         ...
-	return true;
+  return true;
       case MotionEvent....:
-        // On capture un événement intéressant qui doit causer un clic
-	// On produit ce clic en appelant performClick() : cela permettra
-	// aux services d'accessibilité d'en être avertis
-	performClick();
+        // capture an interesting event that should trigger a click
+  // We perform this click by calling performClick(): this will allow
+  // the accessibility services to be aware of it
+  performClick();
         return true;
     }
     return false;
@@ -579,40 +589,43 @@ Par exemple&nbsp;:
 
   @Override
   public boolean performClick() {
-    // On appelle l'implémentation de la classe héritée qui fait tout le
-    // travail: générer un AccessibilityEvent et capturer les événements de
-    // clic avec onClick()
+    // We call the implementation of the inherited class that
+    // generate an AccessibilityEvent and capture events from
+    // click with onClick()
     super.performClick();
-    // On réalise ensuite les actions particulières à réaliser dans
-    // la vue personnalisée
+    // We then perform the specific actions to be carried out in
+    // the custom view
     blabla();
     return true;
   }
 ```
 
-## Pour aller plus loin
-Il arrive que des implémentations sous forme de vues personnalisées ne permettent pas aux services d'accessibilité de récupérer suffisamment d'éléments de contexte pour restituer l'interface de manière satisfaisante. C'est par exemple le cas d'un ensemble de vues pour lequel une action sur l'une des vues modifie le contenu d'une ou de plusieurs autres vues. Dans ce cas, un service d'accessibilité ne pourra pas être averti qu'une action sur une vue en modifie une autre, car la relation entre les vues n'est pas explicite. Pour contourner ce problème, il est possible de créer des "vues virtuelles" qui ne seront exposées qu'aux seuls services d'accessibilité. Ces vues virtuelles permettent notamment de mieux représenter les informations et le comportement de l'interface et de faire en sorte que les services d'accessibilité aient accès des informations en rapport avec la "logique" de l'application.
-La mise en oeuvre d'une vue virtuelle est complexe&nbsp;: elle consiste notamment à étendre la classe `AccessibilityNodeProvider`. Pour plus de détails, nous renvoyons à <a href="https://code.google.com/p/android-source-browsing/source/browse/samples/ApiDemos/src/com/example/android/apis/accessibility/AccessibilityNodeProviderActivity.java?repo=platform--development" lang="en">cet exemple fourni par Google</a>.
 
-Pour des usages très spécifiques, les services d'accessibilité "standards" tels que TalkBack peuvent ne pas donner entière satisfaction&nbsp;: le concepteur d'une application peut souhaiter que celle-ci ait pleinement la main sur la manière dont seront restitués les éléments de son interface. Par exemple, ce peut être le cas d'applications qui nécessitent de piloter plusieurs outils de synthèse vocale pour distinguer des contenus de natures différentes (ce comportement n'est pas possible avec TalkBack)&nbsp;: utiliser une voix "standard" pour lire le contenu des éléments de l'interface utilisateur de l'application, et une voix de meilleure qualité pour lire le contenu d'un document. l'API d'Android répond à ce besoin en donnant au développeur la possibilité de créer ses propres services d'accessibilité. Le principal rôle d'un tel service sera de traiter les événements d'accessibilité et de les interpréter. Un service possède un type défini qui détermine le retour qu'il fournit à l'utilisateur&nbsp;: `FEEDBACK_SPOKEN, FEEDBACK_BRAILLE, FEEDBACK_VISUAL`, etc. Un service peut capturer tous les événements ou les filtrer selon leur type (capturer uniquement les prises de focus par exemple). Enfin, il peut avoir une portée restreinte à un <span lang="en">package</span> ou un ensemble de <span lang="en">packages</span> pour se limiter à une application précise, ou bien avoir une portée "globale" pour traiter toutes les applications du système. Pour créer un service, il est nécessaire d'étendre la classe `AccessibilityService`. Cette opération est complexe et nous revoyons à <a href="http://code.google.com/p/eyes-free/source/browse/trunk/documentation/ClockBackTutorial/Step-By-Step/src/com/google/android/marvin/clockback/ClockBackService.java?r=576" lang="en">cet exemple d'implémentation de service</a> proposé par Google pour plus de détails.
+## To go further
 
-## Guides connexes
+It can happen that implementations based on custom views do not allow accessibility services to retrieve enough context elements to render the interface accurately enough. This is the case, for example, of a set of views for which action on one of the views modifies the content of one or more other views. In this case, an accessibility service cannot  be warned that one action on one view modifies another, because the relationship between the views is not explicit. To work around this issue, it is possible to create "virtual views" that will only be exposed to accessibility services. These virtual views make it possible to better represent the information and behavior of the interface, and to make accessibility services access information relating to the "logic" of the application.
+The implementation of a virtual view is complex: it involves extending the `AccessibilityNodeProvider` class. For more details, see <a href="https://github.com/appium/android-apidemos/blob/master/src/io/appium/android/apis/accessibility/AccessibilityNodeProviderActivity.java">this example provided by The Android Open Source Project</a>.
 
-Les guides suivants peuvent être consultés en complément&nbsp;:
+For very specific purposes, "standard" accessibility services such as TalkBack may not be entirely satisfying: the designer of an application may wish to have full control over the way elements of the interface are rendered. For example, this may be the case for applications that need to control multiple text-to-speech tools to distinguish content of different natures (this behavior is not possible with TalkBack): use a "standard" voice to read the user interface elements of the application, and an improved voice to read the contents of a document. The Android API addresses this need by giving the developer the opportunity to create their own accessibility services. The primary role of such a service will be to process and interpret accessibility events. A service has a defined type that determines the feedback it provides to the user: `FEEDBACK_SPOKEN`, `FEEDBACK_BRAILLE`, `FEEDBACK_VISUAL`, and so on. A service can capture all events or filter them according to their type (capture only focus events for example). Finally, it may be limited to a  package  or a set of  packages  to be limited to a specific application, or have a "global" scope to handle all applications in the system. To create a service, it is necessary to extend the `AccessibilityService` class. This is a complex operation and we invite you to check <a href = "https://sites.google.com/site/gdevelopercodelabs/android/accessibility">this example of service implementation</a> proposed by Google for more details.
 
-* [Guide d'audit d'applications mobiles](https://github.com/DISIC/guide-mobile_app_audit)
-* [Guide de conception d'applications mobiles accessibles](https://github.com/DISIC/guide-mobile_app_conception)
-* [Guide de développement d'applications mobiles accessibles avec Ionic et OnsenUI](https://github.com/DISIC/guide-mobile_app_dev_hybride)
+## Related documents
+
+The following guides can be consulted in addition:
+
+* [Mobile Application Audit Guide](https://github.com/DISIC/guide-mobile_app_audit/tree/english)
+* [Accessible Mobile Application Design Guide](https://github.com/DISIC/guide-mobile_app_conception/tree/english)
+* [Mobile Application Development Guide accessible with Ionic and OnsenUI](https://github.com/DISIC/guide-mobile_app_dev_hybride/tree/english)
 
 
-## Ressources externes et références
+## External resources and references
 
-Sources&nbsp;:
+Sources:
 
-* <a href="http://developer.android.com/reference/packages.html" lang="en">API Android</a>
-* <a href="http://developer.android.com/guide/topics/ui/accessibility/apps.htm l" lang="en">Making Applications Accessible</a>
-* <a href="https://code.google.com/p/android-source-browsing/source/browse/samples/ApiDemos/src/com/example/android/apis/accessibility/?repo=platform--development" lang="en">Exemples d'utilisation de l'API Android</a>
-* <a href="http://www.bbc.co.uk/guidelines/futuremedia/accessibility/mobile" lang="en">BBC Mobile Accessibility Prototype</a>
+* <a href="https://developer.android.com/reference/packages.html">Android API packages</a>
+* <a href="https://developer.android.com/guide/topics/ui/accessibility/apps.html">Making Apps More Accessible</a>
+* <a href="https://developer.android.com/training/accessibility/service.html">Developing an Accessibility Service</a>
+* <a href="http://www.bbc.co.uk/guidelines/futuremedia/accessibility/mobile">BBC Mobile Accessibility Guidelines</a>
 
 ## Licence
-Ce document est la propriété du Secrétariat général à la modernisation de l'action publique français (SGMAP). Il est placé sous la [licence ouverte 1.0 ou ultérieure](http://wiki.data.gouv.fr/wiki/Licence_Ouverte_/_Open_Licence), équivalente à une licence <i lang="en">Creative Commons BY</i>. Pour indiquer la paternité, ajouter un lien vers la version originale du document disponible sur le [compte <span lang="en">Github</span> de la DInSIC](https://github.com/DISIC).
+
+This document is the property of the <span lang="fr">Secrétariat général à la modernisation de l'action publique</span> (SGMAP). It is placed under [Open Licence 1.0 or later (PDF, 541 kb)](http://ddata.over-blog.com/xxxyyy/4/37/99/26/licence/Licence-Ouverte-Open-Licence-ENG.pdf), equivalent to a Creative Commons BY licence. To indicate authorship, add a link to the original version of the document available on the [DINSIC's GitHub account](https://github.com/DISIC).

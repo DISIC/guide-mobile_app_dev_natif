@@ -1,107 +1,111 @@
-# Guide de développement d'applications mobiles accessibles avec l'API iOS
+# Mobile application development guide with the iOS API
 
-## Sommaire
+## Table of contents
 
+<!-- MarkdownTOC depth="3" -->
 
-  * [Sommaire](#sommaire)
-  * [À qui s'adresse ce guide&nbsp;?](#%C3%A0-qui-sadresse-ce-guide&nbsp)
-  * [ Généralités sur iOS et l'accessibilité](#g%C3%A9n%C3%A9ralit%C3%A9s-sur-ios-et-laccessibilit%C3%A9)
-    * [ L'accessibilité dans iOS](#laccessibilit%C3%A9-dans-ios)
-    * [L'API UI Accessibility](#lapi-ui-accessibility)
-    * [Les attributs pour l'accessibilité](#les-attributs-pour-laccessibilit%C3%A9)
-  * [Utiliser les éléments de base fournis par UIKIT](#utiliser-les-%C3%A9l%C3%A9ments-de-base-fournis-par-uikit)
-    * [Widgets compatibles](#widgets-compatibles)
-    * [Widgets incompatibles](#widgets-incompatibles)
-  * [Tester l'accessibilité](#tester-laccessibilit%C3%A9)
-  * [Déclarer l'accessibilité des vues](#d%C3%A9clarer-laccessibilit%C3%A9-des-vues)
-    * [Les vues individuelles](#les-vues-individuelles)
-    * [Les vues "container"](#les-vues-container)
-  * [Décrire les éléments d'interface](#d%C3%A9crire-les-%C3%A9l%C3%A9ments-dinterface)
-  * [ Identifier les caractéristiques des éléments d'interface](#identifier-les-caract%C3%A9ristiques-des-%C3%A9l%C3%A9ments-dinterface)
-  * [Définir la zone de restitution d'un élément](#d%C3%A9finir-la-zone-de-restitution-dun-%C3%A9l%C3%A9ment)
-  * [Mettre à jour les descriptions et caractéristiques](#mettre-%C3%A0-jour-les-descriptions-et-caract%C3%A9ristiques)
-  * [Obtenir des informations sur l'état des options d'accessibilité](#obtenir-des-informations-sur-l%C3%A9tat-des-options-daccessibilit%C3%A9)
-  * [Envoyer des notifications aux outils d'assistance](#envoyer-des-notifications-aux-outils-dassistance)
-  * [Capturer et traiter les notifications envoyées par UIKit](#capturer-et-traiter-les-notifications-envoy%C3%A9es-par-uikit)
-  * [Quelques cas particuliers](#quelques-cas-particuliers)
-    * [Les modales](#les-modales)
-    * [Les vues tableau (TableView)](#les-vues-tableau-tableview)
-  * [Guides connexes](#guides-connexes)
-  * [Ressources externes et références](#ressources-externes-et-r%C3%A9f%C3%A9rences)
-  * [Licence](#licence)
+- [Who is this Guide for?](#who-is-this-guide-for)
+- [General information about iOS and accessibility](#general-information-about-ios-and-accessibility)
+  - [Accessibility in iOS](#accessibility-in-ios)
+  - [The UI Accessibility API](#the-ui-accessibility-api)
+  - [Attributes for accessibility](#attributes-for-accessibility)
+- [Use the basic elements provided by UIKit](#use-the-basic-elements-provided-by-uikit)
+  - [Compatible Widgets](#compatible-widgets)
+  - [Incompatible widgets](#incompatible-widgets)
+- [Test for accessibility](#test-for-accessibility)
+- [Declare the accessibility of views](#declare-the-accessibility-of-views)
+  - [Individual views](#individual-views)
+  - [The "container" views](#the-container-views)
+- [Describe interface elements](#describe-interface-elements)
+- [Identify interface elements traits](#identify-interface-elements-traits)
+- [Frame the rendering area of ​​an item](#frame-the-rendering-area-of-%E2%80%8B%E2%80%8Ban-item)
+- [Update descriptions and traits](#update-descriptions-and-traits)
+- [Get information about the status of accessibility options](#get-information-about-the-status-of-accessibility-options)
+- [Send notifications to assistive tools](#send-notifications-to-assistive-tools)
+- [Capture and process notifications sent by UIKit](#capture-and-process-notifications-sent-by-uikit)
+- [Some particular cases](#some-particular-cases)
+  - [Modals](#modals)
+  - [Table views \(TableView\)](#table-views-tableview)
+- [Related documents](#related-documents)
+- [External resources and references](#external-resources-and-references)
+- [Licence](#licence)
 
-## À qui s'adresse ce guide&nbsp;?
+<!-- /MarkdownTOC -->
 
-Ce guide présente des éléments de l'API d'iOS utiles pour développer des applications accessibles aux personnes en situation de handicap. Il s'adresse&nbsp;:
+## Who is this Guide for?
 
-* Aux développeurs
-* Aux concepteurs en charge de la rédaction de spécifications techniques
-* Aux chefs de projets
+This guide presents elements of the iOS API useful for developing applications accessible to people with disabilities. It is aimed at:
 
-Pré-requis&nbsp;:
+* Developers
+* Designers responsible for drafting technical specifications
+* Project Managers
 
-* Maîtriser le langage Objective C
-* Maîtriser les principes de programmation sous iOS
-* Maîtriser les concepts utilisés pour gérer les interfaces utilisateurs sous iOS
-* Savoir utiliser XCode
+Prerequisites:
 
-## Généralités sur iOS et l'accessibilité
+* Proficiency in the Objective C language
+* Proficiency in iOS programming principles
+* Mastering the concepts used to manage user interfaces on iOS
+* Knowing how to use XCode
 
-### L'accessibilité dans iOS
-L'API iOS met à disposition des développeurs des fonctionnalités permettant de créer des applications accessibles. Ces fonctionnalités sont présentes dans les classes qui permettent de créer les éléments de base d'une interface utilisateur ainsi que dans des classes dédiées à l'accessibilité.
+## General information about iOS and accessibility
 
-Les applications iOS peuvent être utilisées par des personnes en situation de handicap (visuel, moteur, etc.), grâce à l'activation de fonctionnalités dédiées à l'accessibilité sur l'appareil utilisé pour exécuter les applications et parfois grâce à l'utilisation de périphériques externes (claviers, commutateurs, plages braille, etc.). Les fonctionnalités intégrées directement dans iOS sont par exemple&nbsp;:
+### Accessibility in iOS
+The iOS API provides developers with features to create accessible applications. These features are present in the classes that allow the creation of the basic elements of a user interface as well as in classes dedicated to accessibility.
 
-* Zoom&nbsp;: possibilité d'agrandir le contenu de l'écran
-* Affichage en blanc sur fond noir (inversion des couleurs)
-* Sortie audio en mono seulement&nbsp;: mixe les deux canaux d'un signal sonore en un seul
-* Auto-complétion&nbsp;: prononce les suggestions de corrections pendant la saisie d'un texte par l'utilisateur
-* Contrôle vocal&nbsp;: permet à un utilisateur d'accéder à certaines fonctionnalités de l'appareil en parlant
-* Lecteur d'écran&nbsp;: iOS est livré avec le logiciel VoiceOver qui permet à un utilisateur déficient visuel de contrôler son appareil sans voir l'écran (prononciation du contenu vocalement, redéfinition des gestes, pilotage d'un afficheur braille, etc.)
+iOS applications can be used by people with disabilities (visual, motor, etc.), by enabling accessibility features on the device used to run applications, and sometimes by using external devices (keyboards, switches, braille displays, etc.). The features built directly into iOS are for example:
 
-Les fonctionnalités d'accessibilité peuvent être activées en se rendant dans le menu "Réglages" de l'appareil, puis dans l'onglet "Accessibilité".
+* Zoom: possibility to magnify the contents on screen
+* Display in white on black background (color inversion)
+* Audio output in mono only: mixes both channels of a sound signal into one
+* Auto-completion: pronounces suggestions for corrections during text input by the user
+* Voice control: allows a user to access certain features of the device through vocal input
+* Screen reader: iOS comes with VoiceOver, that allows to control the device without seeing the screen (text-to speech output, redefinition of gestures, driving of a Braille display, etc.)
 
-La simple activation de fonctionnalités d'accessibilité ne suffit pas à rendre une application pleinement accessible&nbsp;: le développeur doit mettre en oeuvre des techniques particulières lors du codage de l'application pour rendre son contenu exploitable par les logiciels prenant en charge l'accessibilité.
+The accessibility features can be activated by going to the "Settings" menu of the device, then in the "Accessibility" tab.
 
-Dans iOS, une application est dite accessible lorsque tous les éléments de son interface avec lesquels l'utilisateur peut interagir sont accessibles, c'est-à-dire lorsque chaque élément se déclare comme un élément porteur d'accessibilité. Par ailleurs, un élément doit porter des informations précises et pertinentes qui pourront être interprétées par les logiciels prenant en charge l'accessibilité&nbsp;: position sur l'écran, nom, comportement, valeur et type.
+The simple activation of accessibility features is not enough to make an application fully accessible: the developer must implement special techniques when coding the application to make its content accessible by software that supports accessibility.
 
-### L'API UI Accessibility
+In iOS, an application is said to be accessible when all the elements of its interface with which the user can interact are accessible, that is to say when each element declares itself as an element providing accessibility. In addition, an item must have accurate and relevant information that can be interpreted by software that supports accessibility: screen position, name, behavior, value, and type.
 
-Depuis la version 3.0, iOS dispose d'une API dédiée à l'accessibilité ("UI Accessibility"). Cette API permet de fournir aux logiciels prenant en charge l'accessibilité toutes les informations utiles pour décrire l'interface utilisateur d'une application.
+### The UI Accessibility API
 
-L'API UI Accessibility fait partie de UIKit. Ses fonctionnalités sont implémentés par défaut dans les vues et éléments d'interfaces de base d'iOS. Ainsi, des applications accessibles pourront facilement être créées tans que ces éléments de bases seront utilisées. Si des interfaces graphiques plus complexes doivent être créées (par l'utilisation de vues personnalisées), les travaux pour les rendre accessibles seront plus importants.
+Since version 3.0, iOS has an API dedicated to accessibility ("UI Accessibility"). This API provides software that supports accessibility with all the information needed to describe the user interface of an application.
 
-L'API UI Accessibility est constituée de deux protocoles, d'une classe, d'une fonction et d'un ensemble de constantes&nbsp;:
+The UI Accessibility API is part of UIKit. Its features are implemented by default in iOS basic user interface views and elements. Thus, accessible applications can easily be created when these basic elements are used. If more complex graphical interfaces are to be created (by using custom views), the efforts to make them accessible will be more important.
 
-* Le protocole `UIAccessibility`&nbsp;: les objets qui implémentent ce protocole portent des informations relatives à leur accessibilité (à savoir s'ils déclarent être accessibles ou non) et fournissent des informations les décrivant. Les vues et éléments de base implémentent ce protocole par défaut.
-* Le protocole `UIAccessibilityContainer`&nbsp;: ce protocole permet à une sous-classe d'UIView de rendre tout ou partie des objets qu'elle contient accessibles en tant qu'éléments distincts. Ceci sert lorsque les objets contenus dans une vue ne sont pas eux-mêmes des sous-classes d'UIView qui ne sont ainsi pas automatiquement considérés comme accessibles.
-* La classe `UIAccessibilityElement`&nbsp;: cette classe définit un objet qui peut être renvoyé via le protocole UIAccessibilityContainer. Une instance de UIAccessibilityContainer peut être créée pour représenter un élément qui n'est pas automatiquement considéré comme étant accessible (par exemple, un objet qui n'hérite pas d'UIView).
-* Des constantes (définies dans `UIAccessibilityConstants.h`)&nbsp;: ce sont les caractéristiques exposées par un élément et les notifications qu'une application peut envoyer.
+The UI Accessibility API consists of two protocols, a class, a function, and a set of constants:
 
-### Les attributs pour l'accessibilité
+* The `UIAccessibility` protocol: Objects that implement this protocol carry information about their accessibility (i.e. whether they declare being accessible or not) and provide information describing them. The basic views and elements implement this protocol by default.
+* The `UIAccessibilityContainer` protocol: this protocol allows a subclass of UIView to make all or part of the objects it contains accessible as separate elements. This is useful when objects in a view are not themselves UIView subclasses that are not automatically considered accessible.
+* The `UIAccessibilityElement` class: This class defines an object that can be returned via the `UIAccessibilityContainer` protocol. An instance of `UIAccessibilityContainer` can be created to represent an element that is not automatically considered to be accessible (for example, an object that does not inherit from UIView).
+* Constants (defined in `UIAccessibilityConstants.h`): these are the characteristics exposed by an element and the notifications that an application can send.
 
-Les contrôles et vues contiennent des attributs permettant de fournir des informations concernant leur accessibilité aux applications d'assistance. Ce sont par exemple&nbsp;:
+### Attributes for accessibility
 
-* `isAccessibilityElement`&nbsp;: indique si l'élément est accessible.
-* `accessibilityLabel`&nbsp;: donne une courte description d'un élément qui permet de comprendre ce qu'il contient ou ce qu'il permet de faire. Cet description ne doit pas comporter d'information concernant le type d'élément. Exemple&nbsp;: "Play", "Ajouter", etc. Le contenu de cet attribut sera lu par VoiceOver à la place du titre du composant s'il en possède un&nbsp;: dans ce cas, il permet d'expliciter ou de préciser le titre du composant.
-* `accessibilityLanguage`&nbsp;: indique la langue utilisée pour décrire l'élément. Cette information est utiles pour les outils de synthèse vocale afin que la voix appropriée soit automatiquement sélectionnée.
-* `accessibilityTraits`&nbsp;: une contient une combinaison d'une ou plusieurs caractéristiques, qui décrit l'état, le comportement ou le rôle d'un élément.
-* `accessibilityHint`&nbsp;: indique une brève description qui permet à l'utilisateur de savoir ce que produit une action sur un élément.
-* `accessibilityValue`&nbsp;: la valeur actuelle d'un élément. Par exemple, 30% pour un potentiomètre permettant de choisir le volume du son.
-* `accessibilityFrame`&nbsp;: la position d'un élément sur l'écran.
-* `accessibilityElementIsHidden`&nbsp;: indique si un élément doit être restitué ou non par VoiceOver.
+Controls and views contain attributes that provide information about their accessibility to assistive technologies. These are for example:
 
-
-Les éléments porteurs d'accessibilité contiennent ces attributs&nbsp;: ces informations peuvent être fournies dans l'<span lang="en">Interface Builder</span> au moment de la création de l'interface ou par le programmeur dans le code Objective C. Les attributs `accessibilityLabel` et `accessibilityFrame` sont toujours requis. L'attribut `accessibilityValue` est utile lorsque le contenu d'un élément est modifiable et qu'il ne peut pas être décrit par `accessibilityLabel`.
-
-## Utiliser les éléments de base fournis par UIKIT
-
-UIKit fournit des éléments de base (<span lang="en">widgets</span>) qui implémentent correctement l'accessibilité. Il convient en premier lieu de privilégier l'utilisation de ces éléments et de n'en définir de nouveaux qu'en cas de nécessité. Nous listons ci-dessous des éléments compatibles et non compatibles avec les outils d'accessibilité. Ils ont été testés avec les versions d'iOS 6, 7, 8 et 9.
+* `isAccessibilityElement`: indicates whether the item is accessible.
+* `accessibilityLabel`: gives a short description of an element that allows to understand its content or purpose. This description should not include information about the item type. Example: "Play", "Add", and so on. The content of this attribute will be read by VoiceOver instead of the title of the component if it has one: in this case, it allows to make explicit or specify the title of the component.
+* `accessibilityLanguage`: indicates the language used to describe the element. This information is useful for text-to-speech tools so that the appropriate voice is automatically selected.
+* `accessibilityTraits`: contains a combination of one or more characteristics that describes the state, behavior, or role of an element.
+* `accessibilityHint`: provides a brief description that allows the user to know the consequence of an action on an item.
+* `accessibilityValue`: The current value of an item. For example, 30% for a potentiometer to set the volume.
+* `accessibilityFrame`: the position of an item on screen.
+* `accessibilityElementIsHidden`: indicates whether or not an item should be rendered by VoiceOver.
 
 
-### Widgets compatibles
+Accessibility-enabled elements contain these attributes: this information can be provided in the Interface Builder when creating the interface or by the programmer in the Objective C code. Attributes `accessibilityLabel` and `accessibilityFrame` are always required. The `accessibilityValue` attribute is useful when the content of an element is editable and cannot be described by `accessibilityLabel`.
 
-Vues&nbsp;:
+## Use the basic elements provided by UIKit
+
+UIKit provides basic elements (widgets) that correctly implement accessibility. Using them as a first choice is recommended, while defining new ones only when required.
+
+We provide below lists of elements that are either compatible or not compatible with accessibility tools. They have been tested with iOS 6, 7, 8 and 9.
+
+
+### Compatible Widgets
+
+Views:
 
 * UIAlertView
 * UIPickerView
@@ -109,7 +113,7 @@ Vues&nbsp;:
 * UITableView
 * UIWebView
 
-Les composants&nbsp;:
+Components:
 
 * UIButton
 * UIImage
@@ -119,49 +123,49 @@ Les composants&nbsp;:
 * UISwitch
 * UITextField
 
-### Widgets incompatibles
-En revanche, les <span lang="en">widgets</span> suivants ne sont pas directement compatibles avec les outils d'accessibilité. Ils devront être adaptés au cas par acas&nbsp;:
+### Incompatible widgets
+On the other hand, the following widgets are not directly compatible with the accessibility tools. They will need to be adapted on a case-by-case basis:
 
 * CollectionView
 * UIPageControl
 * MapKitView
 
-## Tester l'accessibilité
+## Test for accessibility
 
-Dans l'API iOS, les fonctionnalités relatives à l'accessibilité sont "stabilisées" depuis la version 5 (il n'y pas de changement majeur dans l'API). Cependant, les outils d'accessibilité (VoiceOver notamment) évoluent rapidement et changent parfois l'interprétation qu'ils font de certains éléments d'interface ou de certaines notifications liées à l'accessibilité. L'interprétation par les services d'accessibilité des <span lang="en">widgets</span> courants est relativement stable&nbsp;: les tests réalisés n'ont pas permis de mettre en évidence des régressions. En revanche, l'interprétation de vues personnalisées peut varier, mais ces variations sont extrêmement complexes à documenter. Il est ainsi nécessaire de tester l'accessibilité d'une application iOS afin de vérifier que les recommandations présentées ci-dessous sont bien prises en compte par les services d'accessibilité (voir le [Guide d'audit d'applications mobiles](https://github.com/DISIC/guide-mobile_app_audit)).
+In the iOS API, the accessibility features have been "stabilized" since version 5 (there is no major change in the API). However, accessibility tools (VoiceOver in particular) are evolving rapidly and sometimes change their interpretation of certain interface elements or accessibility notifications. The interpretation by the accessibility services of the common widgets is relatively stable: the tests performed did not reveal regressions. On the other hand, the interpretation of custom views may vary, but these variations are extremely complex to document. It is therefore necessary to test the accessibility of an iOS application in order to verify that the recommendations presented below are taken into account by the accessibility services (see [Mobile Application Audit Guide](https://github.com/DISIC/guide-mobile_app_audit/tree/english)).
 
-## Déclarer l'accessibilité des vues
+## Declare the accessibility of views
 
-C'est au développeur de s'assurer de l'accessibilité des vues personnalisées qu'il crée. Il existe deux situations&nbsp;: les vues individuelles et les vues "containers".
+It is up to the developer to ensure the accessibility of the custom views he creates. There are two situations: individual views and container views.
 
-### Les vues individuelles
-Ce sont des vues qui contiennent un unique élément avec lequel l'utilisateur peut interagir. Il est nécessaire de déclarer ces vues comme étant accessibles. Plusieurs moyens sont à disposition&nbsp;: soit dans l'<span lang="en">Interface Builder</span>, soit dans le code Objective C de l'application.
+### Individual views
+These are views that contain a single element with which the user can interact. It is necessary to declare these views as accessible. Several ways are available: either in the Interface Builder or in the Objective C code of the application.
 
-Une première possibilité est de déclarer l'attribut `setIsAccessibilityElement` lors de l'instanciation de la vue&nbsp;:
+A first possibility is to declare the `setIsAccessibilityElement` attribute when instantiating the view:
 ```
-  @implementation VuePersController
+  @implementation CustomViewController
   - (id)init
    {
-     _view = [[[VuePers alloc] initWithFrame:CGRectZero] autorelease];
+     _view = [[[CustomView alloc] initWithFrame:CGRectZero] autorelease];
      [_view setIsAccessibilityElement:YES];
      ...
    }
 ```
 
-Une autre option est d'implémenter la méthode `isAccessibilityElement` du protocole `UIAccessibility`&nbsp;:
+Another option is to implement the `isAccessibilityElement` method of the `UIAccessibility` protocol:
 ```
-  @implementation VuePers
+  @implementation CustomView
   - (BOOL)isAccessibilityElement
    {
       return YES;
    }
 ```
 
-### Les vues "container"
+### The "container" views
 
-Les vues "container" regroupent d'autres vues qui constituent les éléments de l'interface avec lesquels l'utilisateur interagit. Ce sont ces éléments regroupés qui doivent être déclarés comme étant accessibles&nbsp;: la vue "container" ne doit pas être déclarée comme étant accessible, mais doit déclarer la liste des éléments accessibles qu'elle contient. Pour cela, il faut utiliser le protocole `UIAccessibilityContainer`.
+The "container" views group together other views that constitute the elements of the interface with which the user interacts. It is these aggregated items that must be declared as accessible: the "container" view must not be declared as accessible, but must declare the list of accessible items it contains. To do this, use the `UIAccessibilityContainer` protocol.
 
-Déclarer la liste des éléments accessibles contenus dans la vue en utilisant `accessibleElements`&nbsp;:
+Declare the list of accessible items contained in the view using `accessibleElements`:
 ```
   - (NSArray *)accessibleElements
   {
@@ -170,21 +174,20 @@ Déclarer la liste des éléments accessibles contenus dans la vue en utilisant 
         return _accessibleElements;
      }
      _accessibleElements = [[NSMutableArray alloc] init];
-     /* Crée un premier élément et l'initialise comme étant contenu dans la vue */
+     /* Creates a first element and initializes it as contained in the view */
      UIAccessibilityElement *element1 = [[[UIAccessibilityElement alloc] initWithAccessibilityContainer:self] autorelease];
-     /* Ajoute des attributs à cet élément */
+     /* Adds attributes to this element */
      [_accessibleElements addObject:element1];
-     /* Crée un deuxième élément... */
+     /* Creates a second element... */
      UIAccessibilityElement *element2 = [[[UIAccessibilityElement alloc] initWithAccessibilityContainer:self] autorelease];
-     /* Lui ajoute des attributs */
+     /* Adds attributes */
      [_accessibleElements addObject:element2];
      /* etc... */
      ...
      return _accessibleElements;
   }
 ```
-
-Il faut ensuite déclarer que cette vue n'est pas accessible&nbsp;:
+Then declare that this view is not accessible:
 ```
   - (BOOL)isAccessibilityElement
   {
@@ -192,8 +195,7 @@ Il faut ensuite déclarer que cette vue n'est pas accessible&nbsp;:
   }
 ```
 
-Enfin, implémenter les méthodes `accessibilityElementCount`, `accessibilityElementAtIndex` et `indexOfAccessibilityElement` du protocole `UIAccessibilityContainer`&nbsp;:
-
+Finally, implement the `accessibilityElementCount`, `accessibilityElementAtIndex` and `indexOfAccessibilityElement` methods of the `UIAccessibilityContainer protocol:
 ```
   - (NSInteger)accessibilityElementCount
   {
@@ -211,63 +213,62 @@ Enfin, implémenter les méthodes `accessibilityElementCount`, `accessibilityEle
   }
 ```
 
-## Décrire les éléments d'interface
+## Describe interface elements
+Many elements of a user interface provide information about their use or meaning through visual indications. For example, a note-taking application uses an element containing the image of a "plus" sign to indicate that the user can add a new note. An input field may have an indication in the form of an image, making it possible to specify the information that the user must provide. A blind user cannot perceive these visual indications. It is therefore necessary to use a means to add an alternative to these indications. To do this, you must use the attributes `accessibilityLabel` and `accessibilityHint` in the definition of an interface element. Assistive software use these attributes as a basis to communicate to users the information needed to understand interface elements. When the human language of descriptions changes, it is necessary to use the `accessibilityLanguage` attribute to ensure that the text is correctly pronounced by VoiceOver.
 
-Un grand nombre d'éléments d'une interface utilisateur fournissent des informations sur leur usage ou sur leur signification grâce à des indications visuelles. Par exemple, une application de prise de note utilise un élément contenant l'image d'un signe "plus"  pour indiquer que l'utilisateur peut ajouter une nouvelle note. Une zone de saisie peut disposer d'une indication sous forme d'image qui permet de préciser l'information que l'utilisateur doit renseigner. Un utilisateur aveugle ne peut pas percevoir ces indications visuelles. Il est donc nécessaire d'employer un moyen pour ajouter une alternative à ces indications. Pour cela il faut utiliser les attributs `accessibilityLabel` et `accessibilityHint` dans la définition d'un élément d'interface. Les logiciels d'assistance se basent sur ces attributs pour communiquer aux utilisateurs les informations nécessaires à la bonne compréhension des éléments d'interface. Lorsque la langue des descriptions change, il est nécessaire d'utiliser l'attribut `accessibilityLanguage` en conséquence pour que le texte soit correctement prononcé par VoiceOver.
-
-Exemple&nbsp;:
+Example:
 ```
-  [e1 setAccessibilityLabel:@"Ouvrir"];
-  [e2 setAccessibilityLabel:@"Open"];
-  [e2 setAccessibilityLanguage:@”en_US”];
+  [e1 setAccessibilityLabel:@"Open"];
+  [e2 setAccessibilityLabel:@"Ouvrir"];
+  [e2 setAccessibilityLanguage:@”fr”];
 ```
 
-NB&nbsp;: les noms propres, les mots d'origine étrangère présent dans le dictionnaire et les mots d'origine étrangère d'usage courant ("play", "OK", etc.) ne doivent pas faire l'objet d'un changement de langue.
+NB: proper nouns, words of foreign origin officially accepted in the reference dictionary, and words of foreign origin commonly used (e.g.: "hasta la vista"), should not be subject to language change.
 
 
-## Identifier les caractéristiques des éléments d'interface
+## Identify interface elements traits
 
-Les caractéristiques permettent de fournir des informations précises aux outils d'assistance sur le comportement et le rôle des éléments d'interface.
+The traits allow to provide precise information to the assistance tools on the behavior and the role of the interface elements.
 
-Les éléments de base d'UIKit sont déjà paramétrés avec les caractéristiques appropriées. Si un élément est personnalisé ou lors de la création d'une vue personnalisée, il est nécessaire de déclarer ses caractéristiques. Un élément peut disposer d'une ou de plusieurs caractéristiques qui seront combinées avec l'opérateur `OR`.
+The basic elements of UIKit are already set up with the appropriate traits. For customized item or custom views, it is necessary to declare their traits. An element can have one or more traits that will be combined with the `OR` operator.
 
-L'API d'accessibilité propose deux catégories de caractéristiques&nbsp;:
+The Accessibility API offers two categories of traits:
 
-* Celles qui décrivent le type d'un élément (bouton, image, etc.)
-* Celles qui définissent le comportement d'un élément (champ de recherche, lancer la lecture d'un son, etc.)
+* Those that describe the type of an element (button, image, etc.)
+* Those that define the behavior of an element (search field, play a sound, etc.)
 
-Les caractéristiques fournies par l'API sont notamment les suivantes&nbsp;:
+Traits provided by the API include:
 
-* `UIAccessibilityTraitNone`&nbsp;: l'élément n'a pas de comportement défini. Cette caractéristique permet de supprimer toutes les autres (elle ne peut être utilisée en conjonction avec d'autres).
-* `UIAccessibilityTraitButton`&nbsp;: l'élément doit être considéré comme un bouton. Le mot "bouton" sera prononcé par VoiceOver après le "label" de l'élément.
-* `UIAccessibilityTraitLink`&nbsp,: l'élément doit être considéré comme un lien. Le mot "lien" sera prononcé par VoiceOver après le "label" de l'élément. Cette caractéristique doit être utilisée en lieu et place de `UIAccessibilityTraitButton` pour les actions qui ouvrent une page dans un navigateur.
-* `UIAccessibilityTraitSearchField`&nbsp,;: l'élément doit être considéré comme un champ de saisie permettant d'effectuer une recherche. Cette caractéristique s'applique aux recherches restreintes au contexte de l'application. Par exemple, le champ de saisie d'un moteur de recherche sur le Web ne devra pas posséder cette caractéristique.
-* `UIAccessibilityTraitImage`&nbsp,;: l'élément doit être considéré comme une image. Le mot "image" sera prononcé par VoiceOver après le "label" de l'élément. Cette caractérisitque peut être combinée avec d'autres (`UIAccessibilityTraitButton` ou `UIAccessibilityTraitLink` par exemple). `UIAccessibilityTraitImage` doit être utilisée lorsque l'apparence de l'image véhicule une information essentielle à la compréhension&nbsp;: elle ne doit pas être utilisée pour les images de décoration. Pour les boutons intégrés sous forme d'une image dont l'apparence n'apporte pas d'information essentielle à la compréhension de l'action, seule `UIAccessibilityTraitButton` devra être utilisée.
-* `UIAccessibilityTraitSelected`&nbsp;: l'élément doit être considéré comme sélectionné. Le mot "sélectionné" sera prononcé par VoiceOver après le "label" de l'élément. Cette caractéristique pourra par exemple être utilisée pour indiquer l'état d'un panneau dans un système d'onglets (<span lang="en">tabpanel</span>).
-* `UIAccessibilityTraitPlaysSound`&nbsp;: l'élément permet de lancer la lecture d'un son.
-* `UIAccessibilityTraitKeyboardKey`&nbsp;: l'élément se comporte comme une touche de clavier.
-* `UIAccessibilityTraitStaticText`&nbsp;: l'élément doit être considéré comme du texte statique, qui ne peut pas être modifié.
-* `UIAccessibilityTraitSummaryElement`&nbsp;: représente un résumé de l'état courant d'un élément restitué lorsque l'application démarre. (NB&nbsp;: le focus n'est pas placé sur cet élément&nbsp;; le résumé n'est restitué qu'une fois à l'ouverture de l'application, mais pas à chaque nouvel affichage de la page concernée). Cette caractéristique peut ainsi être utilisée pour attirer l'attention de l'utilisateur de VoiceOver sur un élément important de la page d'accueil qui n'apparaît pas immédiatement dans l'ordre des éléments focusables.
-* `UIAccessibilityTraitNotEnabled`&nbsp;: indique qu'un élément est désactivé ou n'est pas destiné à répondre aux interactions. Cette caractéristique peut par exemple être utilisée dans le cas où un bouton appraît dans l'interface mais dont le fonctionnement est temporairement désactivé. `UIAccessibilityTraitNotEnabled` peut être combinée avec d'autres caractéristiques (comme `UIAccessibilityTraitButton`).
-* `UIAccessibilityTraitUpdatesFrequently`&nbsp;: indique que le contenu de l'élément est mis à jour trop fréquemment pour qu'il soit pertinent d'envoyer des notifications aux logiciels d'assistance à chaque changement. Cela permet d'éviter de "saturer" le contenu restitué par VoiceOver lorsqu'un élément change très rapidement (le contenu affiché par un chronomètre par exemple).
-* `UIAccessibilityTraitStartsMediaSession`&nbsp;: indique que l'élément permet de lancer la lecture d'un contenu multimédia et ainsi d'indiquer à VoiceOver qu'il ne doit pas utiliser la synthèse vocale (la lecture du média pourra ainsi être lancée sans être perturbée par un texte énoncé par VoiceOver).
-* `UIAccessibilityTraitAdjustable`&nbsp;: indique que la valeur d'un élément (comme un <span lang="en">slider</span>) peut être ajustée. Le mot "ajustable" sera prononcé par VoiceOver après le label, ainsi que le message "glissez vers le haut ou vers le bas pour modifier la valeur". L'utilisation de cette caractéristique provoque une modification du comportement par défaut de VoiceOver, qui redéfinit les gestes de "glissement" vers le haut et vers le bas pour ajuster la valeur de l'élément&nbsp;: l'action par défaut de ces gestes (par exemple la navigation de titre en titre) n'est donc plus disponible dans ce contexte..
-* `UIAccessibilityTraitAllowsDirectInteraction`&nbsp;: représente un élément avec lequel l'utilisateur peut interagir directement via l'écran tactile. Lorsque cette caractéristique est activée, VoiceOVer n'interprète plus les gestes de l'utilisateur et laisse cette interprétation à la charge de l'application.
-* `UIAccessibilityTraitCausesPageTurn`&nbsp;: représente un élément qui provoque automatiquement le passage à la page suivante lorsque les outils d'assistance arrivent à la fin du contenu. L'utilisation de cette caractéritique est par exemple pertinente dans une applicaiton de lecture de livre numérique pour automatiser le passage d'une page à la suivante lors de la restitution du texte par VoiceOver, sans que l'utilisateur n'ait à intervenir manuellement.
-* `UIAccessibilityTraitHeader`&nbsp;: indique que l'élément possédant cette caractéristique permet de diviser du contenu (titre, barre de navigation, etc.). Son utilisation permet à VoiceOver de faciliter la navigation à l'intérieur de l'application.
+* `UIAccessibilityTraitNone`: The element has no defined behavior. This feature removes all others (it cannot be used in conjunction with others).
+* `UIAccessibilityTraitButton`: The element should be considered as a button. The word "button" will be pronounced by VoiceOver after the "label" of the element.
+* `UIAccessibilityTraitLink`: the item should be considered as a link. The word "link" will be pronounced by VoiceOver after the "label" of the item. This trait should be used instead of `UIAccessibilityTraitButton` for actions that open a page in a browser.
+* `UIAccessibilityTraitSearchField`: the element should be considered as an input field for searching. This trait applies to searches restricted to the context of the application. For example, the input field of a web search engine should not have this trait.
+* `UIAccessibilityTraitImage`: the element must be considered as an image. The word "image" will be pronounced by VoiceOver after the "label" of the element. This trait can be combined with others (`UIAccessibilityTraitButton` or` UIAccessibilityTraitLink` for example). `UIAccessibilityTraitImage` must be used when the appearance of the image conveys information that is essential for understanding: it should not be used for decorative images. For buttons that are embedded as an image, but whose appearance does not provide essential information to understand their purpose, only `UIAccessibilityTraitButton` should be used.
+* `UIAccessibilityTraitSelected`: the item should be considered as selected. The word "selected" will be pronounced by VoiceOver after the "label" of the item. For example, this feature can be used to indicate the state of a panel in a tab system.
+* `UIAccessibilityTraitPlaysSound`: the item allows to start playing a sound.
+* `UIAccessibilityTraitKeyboardKey`: the element behaves like a keyboard key.
+* `UIAccessibilityTraitStaticText`: the element must be considered as static text, which cannot be modified.
+* `UIAccessibilityTraitSummaryElement`: represents a summary of the current state of a rendered element when the application starts. (NB: the focus is not placed on this element; the summary is only rendered once when the application is opened, but not every time the interface is displayed again). This trait can be used to draw the attention of the VoiceOver user to an important element of the home screen that does not immediately appear in the focus order.
+* `UIAccessibilityTraitNotEnabled`: indicates that an item is disabled or is not intended to respond to interactions. This characteristic can be used, for example, in the case where a button appears in the interface but whose operation is temporarily deactivated. `UIAccessibilityTraitNotEnabled` can be combined with other traits (such as `UIAccessibilityTraitButton`).
+* `UIAccessibilityTraitUpdatesFrequently`: indicates that the content of the item is updated too frequently to make it relevant to send notifications to assistive software every time. This prevents "saturation" of content rendered by VoiceOver when an item changes very quickly (e.g. content displayed by a stopwatch).
+* `UIAccessibilityTraitStartsMediaSession`: indicates that the item allows to start playback of multimedia content, and tell VoiceOver that it should not output speech (media playback can be started without being disrupted by VoiceOver's speech output).
+* `UIAccessibilityTraitAdjustable`: indicates that the value of an item (such as a slider) can be adjusted. The word "adjustable" will be spoken out by VoiceOver after the label, as well as the message "swipe up or down to change the value". Using this trait causes a change in the default behavior of VoiceOver, which redefines upward and downward "swipe" gestures to adjust the element's value: the default action for these gestures (for example navigation by titles) is therefore no longer available in this context.
+* `UIAccessibilityTraitAllowsDirectInteraction`: represents an element with which the user can interact directly via the touchscreen. When this trait is enabled, VoiceOver no longer interprets the user's actions and leaves this interpretation to the application.
+* `UIAccessibilityTraitCausesPageTurn`: represents an element that automatically moves to the next page when assistive tools reach the end of the content. A use case of this trait is, for example, a digital book reading application, to automate the passage from one page to the next when VoiceOver renders the text, without the user having to manually intervene.
+* `UIAccessibilityTraitHeader`: indicates that the element with this trait is used to divide content (title, navigation bar, etc.). It allows VoiceOver to facilitate navigation within the application.
 
-Les caractéristiques peuvent être définies lors de l'initialisation d'une vue&nbsp;:
+Characteristics can be set when initializing a view:
 ```
    - (id)init
    {
-     _view = [[VuePers alloc] initWithFrame:CGRectZero];
+     _view = [[CustomView alloc] initWithFrame:CGRectZero];
      ...
      [_view setAccessibilityTraits:UIAccessibilityTraitButton | UIAccessibilityTraitPlaysSound];
      ...
    }
 ```
 
-Les caractéristiques peuvent aussi être initialisées en définissant la méthode `accessibilityTraits`&nbsp;:
+The traits can also be initialized by defining the `accessibilityTraits` methods:
 ```
    - (UIAccessibilityTraits)accessibilityTraits
    {
@@ -275,55 +276,55 @@ Les caractéristiques peuvent aussi être initialisées en définissant la méth
    }
 ```
 
-## Définir la zone de restitution d'un élément
+## Frame the rendering area of ​​an item
 
-Il est possible de délimiter la zone de restitution d'un composant, c'est-à-dire la zone à l'intérieur de laquelle une interaction tactile déclenchera la restitution du contenu de ce composant par VoiceOver. Ceci peut être utile pour limiter le risque de confondre l'élément avec des éléments voisins proches lors de l'exploration tactile de l'écran. Pour cela, il faut utiliser la fonction `setAccessibilityFrame`.
+It is possible to frame the rendering area of a component, i.e. the area within which a touch interaction will trigger the rendering of the component's content by VoiceOver. This can be useful to limit the risk of mistaking the element from neighboring elements during exploration by touch. To do this, use the `setAccessibilityFrame` function.
 
-Exemple&nbsp;:
+Example:
 ```
   [_c setAccessibilityFrame:CGRectMake(10,10,130,130)];
 ```
 
-## Mettre à jour les descriptions et caractéristiques
+## Update descriptions and traits
 
-Lorsque les éléments d'interface d'une application changent, il est nécessaire de mettre à jour leurs descriptions et caractéristiques. Les méthodes permettant d'indiquer les attributs utiles pour l'accessibilité (`accessibilityLabel`, `accessibilityTraits`, etc.) doivent donc retourner des valeurs en fonction du contexte précis de l'élément et non "initialisées une fois pour toutes".
+When the interface elements of an application change, it is necessary to update their descriptions and traits. Methods for specifying attributes useful for accessibility (`accessibilityLabel`, `accessibilityTraits`, etc.) must therefore return values ​​according to the precise context of the element and not "initialized once and for all".
 
-## Obtenir des informations sur l'état des options d'accessibilité
+## Get information about the status of accessibility options
 
-iOS met à disposition des méthodes permettant de récupérer des informations concernant l'état de certaines options d'accessibilité afin d'ajuster le comportement du programme en conséquence.
+iOS provides methods for retrieving information about the status of certain accessibility options to adjust the behavior of the app accordingly.
 
-Par exemple&nbsp;:
+For example:
 
-* `UIAccessibilityIsVoiceOverRunning`&nbsp;: indique si VoiceOver est actif.
-* `UIAccessibilityIsMonoAudioEnabled`&nbsp;: indique si le système audio est en mode mono.
-* `UIAccessibilityIsClosedCaptioningEnabled`&nbsp;: indique si le sous-titrage est activé.
+* `UIAccessibilityIsVoiceOverRunning`: indicates whether VoiceOver is active.
+* `UIAccessibilityIsMonoAudioEnabled`: indicates whether the audio system is in mono mode.
+* `UIAccessibilityIsClosedCaptioningEnabled`: indicates whether closed captioning is enabled.
 
 
 
-## Envoyer des notifications aux outils d'assistance
+## Send notifications to assistive tools
 
-Lorsqu'un élément d'interface change, il est nécessaire d'envoyer une notification afin que les outils d'assistance soient informés de la modification. Des notifications doivent être envoyées lorsqu'un changement "significatif" se produit&nbsp;: il faut éviter de surcharger les outils d'assistance d'informations qu'ils ne seraient pas en mesure de restituer en temps réel.
+When an interface element changes, it is necessary to send a notification so that the assistive tools are notified of the change. Notifications must be sent when a "significant" change occurs: avoid overloading the assistive tools with information that they would not be able to render in real time.
 
-L'envoi de notifications destinées aux outils d'assistance est réalisé avec la méthode `UIAccessibilityPostNotification`.
+Sending notifications to assistive tools is done using the `UIAccessibilityPostNotification` method.
 
-Par exemple, pour notifier le changement d'un élément d'interface&nbsp;:
+For example, to notify the change of an interface item:
 ```
   UIAccessibilityPostNotification(UIAccessibilityLayoutChangedNotification, nil);
 ```
 
-`UIAccessibility` fournit des notifications qui peuvent être envoyées par les applications, parmi lesquelles&nbsp;:
+`UIAccessibility` provides notifications that can be sent by applications, including:
 
-* `UIAccessibilityLayoutChangedNotification`&nbsp;: permet d'envoyer une "annonce" destinée à être restituée par les outils d'assistance (un message peut être passé via une chaîne de caractère en paramètre). Cette notification doit être utilisée pour avertir les utilisateurs de VoiceOver du changement d'un élément de l'interface.
-* `UIAccessibilityAnnouncementNotification`&nbsp;: permet d'envoyer une "annonce" destinée à être restituée par les outils d'assistance (un message peut être passé via une chaîne de caractère en paramètre). Cette notification doit être utilisée pour avertir les utilisateurs d'un événement qui n'a pas modifié d'élément d'interface ou qui en a modifié pour une durée brève.
-* `UIAccessibilityPageScrolledNotification`&nbsp;: permet de fournir de l'information sur le contenu de l'écran après qu'un utilisateur ait "scrollé" avec VoiceOver.
-* `UIAccessibilityPauseAssistiveTechnologyNotification` et `UIAccessibilityResumeAssistiveTechnologyNotification`&nbsp;: permet de stopper temporairement et de recommencer les actions réalisées par les outils d'assistance spécifiés en paramètre.
-* `UIAccessibilityScreenChangedNotification`&nbsp;: permet de notifier les outils d'assistance lors de l'apparition d'une nouvelle vue qui prend une part importante de l'écran. Une chaîne qui sera restituée par les outils d'assistance ou bien un élément d'interface sur lequel sera positionné le focus de l'outil d'assistance utilisé peuvent être passés en paramètre.
+* `UIAccessibilityLayoutChangedNotification`: allows to send a notification to be rendered by the assistive tools (a message can be passed via a string as a parameter). This notification must be used to notify VoiceOver users of the change of an item in the interface.
+* `UIAccessibilityAnnouncementNotification`: allows to send a notification to be rendered by the assistive tools (a message can be passed via a string as a parameter). This notification must be used to notify users of an event that has not changed an interface element or that has changed it for a short time.
+* `UIAccessibilityPageScrolledNotification`: provides information about the screen content after the user has scrolled with VoiceOver.
+* `UIAccessibilityPauseAssistiveTechnologyNotification` and `UIAccessibilityResumeAssistiveTechnologyNotification`: allows to temporarily pause and resume the actions performed by the assistive tools specified in parameters.
+* `UIAccessibilityScreenChangedNotification`: allows to notify assistive tools when a new view appears that takes up an important part of the screen. A string, that will be rendered by the assistive tools, or an interface element where the assistive tool's focus is, can be passed as a parameter.
 
-## Capturer et traiter les notifications envoyées par UIKit
+## Capture and process notifications sent by UIKit
 
-UIKit envoie des notifications relatives à l'accessibilité qu'il peut être utile de traiter pour améliorer le comportement de l'application. Capturer ces notifications permet de personnaliser le comportement de l'application pour les utilisateurs d'outils d'assistance.
+UIKit sends accessibility notifications that can be handled to improve the behavior of the application. Capturing these notifications allows you to customize the behavior of the application for support tool users.
 
-Ces notifications peuvent être capturée via le centre de notifications. Par exemple, pour capturer la notification `UIAccessibilityVoiceOverStatusChanged`&nbsp;:
+These notifications can be captured via the notification center. For example, to capture the notification `UIAccessibilityVoiceOverStatusChanged`:
 ```
 [[NSNotificationCenter defaultCenter]
     addObserver:self
@@ -332,50 +333,52 @@ Ces notifications peuvent être capturée via le centre de notifications. Par ex
     object:nil];
 ```
 
-Les notifications relatives à l'accessibilité fournies par l'API sont notamment les suivantes&nbsp;:
+Accessibility notifications provided by the API include:
 
-* `UIAccessibilityVoiceOverStatusChanged`&nbsp;: envoyée par UIKit lorsque VoiceOver démarre ou est arrêté.
-* `UIAccessibilityAnnouncementDidFinishNotification`&nbsp;: envoyée par UIKit lorsque la restitution d'une annonce par les outils d'assistance est terminée. Cette notification renvoie un "dictionnaire" contenant deux clés, `UIAccessibilityAnnouncementKeyStringValue` et `UIAccessibilityAnnouncementKeyWasSuccessful`, qui permet de connaître le message qui a été restitué et de savoir si la restitution s'est terminée avec succès ou non.
+* `UIAccessibilityVoiceOverStatusChanged`: sent by UIKit when VoiceOver starts or is stopped.
+* `UIAccessibilityAnnouncementDidFinishNotification`: sent by UIKit when the rendering of a notification through assistive tools is complete. This notification returns a "dictionary" containing two keys, `UIAccessibilityAnnouncementKeyStringValue` and `UIAccessibilityAnnouncementKeyWasSuccessful`, which contain the message that was rendered and whether or not the restitution was successful.
 
-## Quelques cas particuliers
+## Some particular cases
 
-### Les modales
+### Modals
 
-Les vues d'UIKit qui permettent de mettre en oeuvre des modales (`UIAlertView` par exemple) sont accessibles&nbsp;: elles permettent à l'utilisateur d'outils d'assistance de ne pas interagir avec le contenu situé en dehors de la vue. Pour les vues personnalisées, il faut utiliser l'attribut `accessibilityViewIsModal`&nbsp;: lorsque cet attribut vaut "YES" les éléments situés à l'intérieur des vues voisines seront ignorées par les outils d'assistance.
+UIKit views that allow the implementation of modals (`UIAlertView` for example) are accessible: they allow the user of assistive tools to not interact with content outside of the view. For custom views, use the `accessibilityViewIsModal` attribute: when this attribute is set to 'YES', the elements inside the neighboring views will be ignored by the assistive tools.
 
-### Les vues tableau (TableView)
+### Table views (TableView)
 
-Les cellules d'une vue en tableau sont considérées automatiquement comme des containers&nbsp;: il n'est donc pas nécessaire d'implémenter le protocole `UIAccessibilityContainer` pour déclarer la liste des éléments contenus.
-Pour faciliter la restitution par les outils d'assistance, il peut être utile de grouper les informations contenues dans plusieurs cellules en une seule description afin de minimiser le nombre d'opérations que devra effectuer l'utilisateur pour y accéder. Par exemple, il est pertinent de regrouper l'intitulé d'un produit, son poids et son prix en un texte qui sera restitué à l'utilisateur en une seule fois, sans qu'il n'ait à réaliser des gestes pour accéder à chacun des éléments séparément.
+The cells in a table view are automatically considered as containers: so it is not necessary to implement the `UIAccessibilityContainer` protocol to declare the list of contained elements.
+In order to facilitate the rendering by the assistive tools, it may be useful to group the information contained in several cells into a single description, in order to minimize the number of operations that the user must perform to access it. For example, it is appropriate to group the title of a product, its weight and price in a text that will be returned to the user at once, without the user having to make gestures to access each of the elements separately.
 
-La méthode `accessibilityLabel` pourra alors être définie de la sorte&nbsp;:
+The `accessibilityLabel` method can then be defined in this way:
 ```
   - (NSString *)accessibilityLabel
   {
-    NSString *prodNomText = [self.prodNom accessibilityLabel];
-    NSString *prodPoidsText = [self.prodPoids accessibilityLabel];
-    NSString *prodPrixText = [self.prodPrix accessibilityLabel];
+    NSString *prodNameText = [self.prodName accessibilityLabel];
+    NSString *prodWeightText = [self.prodWeight accessibilityLabel];
+    NSString *prodPriceText = [self.prodPrice accessibilityLabel];
 
-    return [NSString stringWithFormat:@"%@, %@, %@", prodNomText, prodPoidsText, prodPrixText];
+    return [NSString stringWithFormat:@"%@, %@, %@", prodNameText, prodWeightText, prodPriceText];
 }
 ```
 
 
-## Guides connexes
+## Related documents
 
-Les guides suivants peuvent être consultés en complément&nbsp;:
+The following guides can be consulted in addition:
 
-* [Guide d'audit d'applications mobiles](https://github.com/DISIC/guide-mobile_app_audit)
-* [Guide de conception d'applications mobiles accessibles](https://github.com/DISIC/guide-mobile_app_conception)
-* [Guide de développement d'applications mobiles accessibles avec Ionic et OnsenUI](https://github.com/DISIC/guide-mobile_app_dev_hybride)
+* [Mobile Application Audit Guide](https://github.com/DISIC/guide-mobile_app_audit/tree/english)
+* [Accessible Mobile Application Design Guide](https://github.com/DISIC/guide-mobile_app_conception/tree/english)
+* [Mobile Application Development Guide accessible with Ionic and OnsenUI](https://github.com/DISIC/guide-mobile_app_dev_hybride/tree/english)
 
-## Ressources externes et références
 
-Sources&nbsp;:
+## External resources and references
 
-* <a href="https://developer.apple.com/library/ios/documentation/UIKit/Reference/UIKit_Framework/" lang="en">UIKit Framework Reference</a>
-* <a href="https://developer.apple.com/accessibility/ios/" lang="en">Accessibility for iOS Developers</a>
-* <a href="http://www.bbc.co.uk/guidelines/futuremedia/accessibility/mobile" lang="en">BBC Mobile Accessibility Prototype</a>
+Sources:
+
+* <a href="https://developer.apple.com/reference/uikit/">UIKit Framework Reference</a>
+* <a href="https://developer.apple.com/accessibility/ios/">Accessibility for iOS Developers</a>
+* <a href="http://www.bbc.co.uk/guidelines/futuremedia/accessibility/mobile">BBC Mobile Accessibility Guidelines</a>
 
 ## Licence
-Ce document est la propriété du Secrétariat général à la modernisation de l'action publique français (SGMAP). Il est placé sous la [licence ouverte 1.0 ou ultérieure](http://wiki.data.gouv.fr/wiki/Licence_Ouverte_/_Open_Licence), équivalente à une licence <i lang="en">Creative Commons BY</i>. Pour indiquer la paternité, ajouter un lien vers la version originale du document disponible sur le [compte <span lang="en">Github</span> de la DInSIC](https://github.com/DISIC).
+
+This document is the property of the <span lang="fr">Secrétariat général à la modernisation de l'action publique</span> (SGMAP). It is placed under [Open Licence 1.0 or later (PDF, 541 kb)](http://ddata.over-blog.com/xxxyyy/4/37/99/26/licence/Licence-Ouverte-Open-Licence-ENG.pdf), equivalent to a Creative Commons BY licence. To indicate authorship, add a link to the original version of the document available on the [DINSIC's GitHub account](https://github.com/DISIC).
