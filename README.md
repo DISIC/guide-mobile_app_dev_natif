@@ -11,6 +11,8 @@ Deux documents distincts sont proposés pour&nbsp;:
 * [Android](./android.md)
 * [iOS](./ios.md)
 
+Le guide est [disponible également en anglais](https://github.com/DISIC/guide-mobile_app_dev_natif/tree/english).
+
 ## Guides connexes
 
 Les guides suivants peuvent être consultés en complément&nbsp;:
